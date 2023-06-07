@@ -1,0 +1,6 @@
+**/Session.vim
+**/node_modules/
+**/.env
+**/nodemon.json
+**/dev-data/
+**/uploads/
