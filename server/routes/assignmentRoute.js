@@ -4,6 +4,7 @@ import multer from 'multer';
 import { catchAsync } from '../utils/catchAsync.js';
 
 import * as assignment from '../controller/assignmentController.js';
+import * as auth from '../controller/authController.js';
 
 export const assignmentRoute = express.Router({ mergeParams: true });
 
@@ -27,6 +28,10 @@ const upload = multer({
 
 assignmentRoute
   .route('/')
-  .post(upload.single('file'), catchAsync(assignment.addAssignment))
+  .post(
+    auth.restrict('prof'),
+    upload.single('file'),
+    catchAsync(assignment.addAssignment)
+  )
   .get(catchAsync(assignment.getAssignments))
-  .delete(catchAsync(assignment.deleteAssignment));
+  .delete(auth.restrict('prof'), catchAsync(assignment.deleteAssignment));

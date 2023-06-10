@@ -3,6 +3,8 @@ import express from 'express';
 
 import * as Student from '../controller/studentController.js';
 import { catchAsync } from '../utils/catchAsync.js';
+import { assignmentRoute } from './assignmentRoute.js';
+import { restrict } from '../controller/authController.js';
 
 export const studentRoute = express.Router();
 
@@ -30,6 +32,8 @@ studentRoute.post('/login', Student.login);
 studentRoute.post('/update-password', Student.protect, Student.updatePassword);
 
 studentRoute.get('/me', Student.protect, Student.getMe);
+
+studentRoute.use('/assignment', Student.protect, assignmentRoute);
 
 // NOTE: Not implementer just for dev purposes
 studentRoute.post('/deleteMe', Student.deleteMe);

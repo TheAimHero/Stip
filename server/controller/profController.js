@@ -41,6 +41,8 @@ export const getMe = generic.getMe(profModel);
 
 export const protect = auth.protect(profModel);
 
+export const restrict = auth.restrict('prof');
+
 // TODO: Still work in progress not yet implemented at all for dev only
 export async function deleteMe(req, res, next) {
   await profModel.deleteMany({});

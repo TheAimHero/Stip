@@ -30,6 +30,8 @@ export const assignmentSchema = new mongoose.Schema({
 
   deadline: { type: Date },
 
+  cancelled: { type: Boolean, default: false },
+
   description: { type: String },
 });
 

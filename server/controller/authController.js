@@ -69,3 +69,12 @@ export function updatePassword() {
     res.status(200).json({ status: 'success', data: { user: req.user } });
   });
 }
+
+export const restrict = (...roles) => {
+  return (req, _, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(new Error('No suffiecient permissions'));
+    }
+    next();
+  };
+};

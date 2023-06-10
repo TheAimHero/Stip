@@ -82,8 +82,6 @@ const studentSchema = new mongoose.Schema({
   },
 });
 
-// TODO: for a new student update his/her assignment array to reflect all the assignments
-
 studentSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, process.env.SALT_ROUNDS * 1);
