@@ -48,6 +48,18 @@ app.use('*', (req, res) => {
   res.status(404).send('Page Not Found');
 });
 
-app.listen(process.env.PORT, () => {
+const server = app.listen(process.env.PORT, () => {
   console.log(`Listening on port ${process.env.PORT}`);
+});
+
+process.on('unhandledRejection', (err, _next) => {
+  console.log(err.name, err.message);
+  console.log('UNHANDLED REJECTION! Shutting down...');
+  server.close(() => process.exit(1));
+});
+
+process.on('uncaughtException', (err, _next) => {
+  console.log(err.name, err.message);
+  console.log('UNCAUGHT EXCEPTION! Shutting down...');
+  server.close(() => process.exit(1));
 });
