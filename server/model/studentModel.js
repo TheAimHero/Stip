@@ -92,6 +92,18 @@ studentSchema.pre('save', async function (next) {
   next();
 });
 
+studentSchema.pre(/^find|save/, function (next) {
+  if (process.env.NODE_ENV !== 'development') next();
+  this.startTime = Date.now();
+  next();
+});
+
+studentSchema.post(/^find|save/, function () {
+  if (process.env.NODE_ENV !== 'development') return;
+  console.log(`Query took ${Date.now() - this.startTime} milliseconds`);
+  return;
+});
+
 const studentModel = mongoose.model('Student', studentSchema);
 
 export default studentModel;
