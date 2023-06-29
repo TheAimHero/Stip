@@ -1,4 +1,4 @@
-import { profModel } from '../model/profModel.js';
+import profModel from '../model/profModel.js';
 import * as authUtils from '../utils/authUtils.js';
 import * as auth from './authController.js';
 import * as generic from './genericController.js';
@@ -43,7 +43,7 @@ export const protect = auth.protect(profModel);
 
 export const restrict = auth.restrict('prof');
 
-// TODO: Still work in progress not yet implemented at all for dev only
+// @todo: Still work in progress not yet implemented at all for dev only
 export async function deleteMe(req, res, next) {
   await profModel.deleteMany({});
   res.status(200).json({ status: 'success', data: {} });

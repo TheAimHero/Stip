@@ -1,10 +1,34 @@
-import { assignmentModel } from '../model/assignmentModel.js';
-import { studentModel } from '../model/studentModel.js';
-import { catchAsync } from '../utils/catchAsync.js';
+import assignmentModel from '../model/assignmentModel.js';
+import studentModel from '../model/studentModel.js';
+import catchAsync from '../utils/catchAsync.js';
+import filter from '../utils/filter.js';
 
 export async function addAssignment(req, res) {
-  req.body.createdBy = req.user._id;
-  const assignment = await assignmentModel.create(req.body);
+  const {
+    name,
+    class: classId,
+    section,
+    subject,
+    deadline,
+    description,
+  } = req.body;
+  const deadlineDate = Date.parse(deadline);
+  if (isNaN(deadlineDate)) {
+    return res
+      .status(400)
+      .json({ status: 'fail', message: 'Deadline is not a valid date' });
+  }
+  // console.log(parseInt(Date.now() / 1e5) * 1e5);
+  const docAssignment = {
+    name,
+    class: classId,
+    createdBy: req.user._id,
+    section,
+    subject,
+    deadline: deadlineDate,
+    description,
+  };
+  const assignment = await assignmentModel.create(docAssignment);
   addToStudents(assignment);
   res.status(200).json({ status: 'success', data: { assignment } });
 }
@@ -12,16 +36,16 @@ export async function addAssignment(req, res) {
 async function addToStudents(assignment) {
   await studentModel.updateMany(
     { section: assignment.section, class: assignment.class },
-    { $push: { assignments: { assignment: assignment._id } } }
+    { $push: { assignments: assignment._id } }
   );
 }
 
 export async function getAssignments(req, res, next) {
-  // TODO: Sort and filter assignments according to query
+  // @todo: Sort and filter assignments according to query
   if (req.user.role === 'prof') {
-    await getAssignmentsProf(req, res, next);
+    getAssignmentsProf(req, res, next);
   } else if (req.user.role === 'student') {
-    await getAssignmentsStudent(req, res, next);
+    getAssignmentsStudent(req, res, next);
   }
 }
 
@@ -39,9 +63,19 @@ const getAssignmentsProf = catchAsync(async (req, res, next) => {
       createdBy: req.user._id,
     });
   } else {
-    assi = await assignmentModel.find({ createdBy: req.user._id });
+    const { query: queryObj } = req;
+    const query = assignmentModel.find({ createdBy: req.user._id });
+    const { query: modQuery } = new filter(query, queryObj)
+      .sortFields()
+      .filterQuery()
+      .sortBy();
+    // @note: pagination
+    // .pagination();
+    assi = await modQuery;
   }
-  res.status(200).json({ status: 'success', data: { assi } });
+  res
+    .status(200)
+    .json({ status: 'success', data: { length: assi.length, assi } });
 });
 
 export async function deleteAssignment(req, res) {

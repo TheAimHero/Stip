@@ -1,4 +1,4 @@
-import { catchAsync } from '../utils/catchAsync.js';
+import catchAsync from '../utils/catchAsync.js';
 
 export function getMe() {
   return catchAsync(async (req, res, next) => {

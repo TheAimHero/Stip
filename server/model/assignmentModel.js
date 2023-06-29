@@ -28,7 +28,16 @@ export const assignmentSchema = new mongoose.Schema({
 
   subject: { type: String, required: [true, 'Subject is required'] },
 
-  deadline: { type: Date },
+  deadline: {
+    type: Date,
+    required: [true, 'Deadline is required'],
+    validate: {
+      validator: function (val) {
+        return val > this.createdAt;
+      },
+      message: 'Deadline is in the past',
+    },
+  },
 
   cancelled: { type: Boolean, default: false },
 
@@ -41,4 +50,6 @@ assignmentSchema.pre('save', function (next) {
   next();
 });
 
-export const assignmentModel = mongoose.model('Assignment', assignmentSchema);
+const assignmentModel = mongoose.model('Assignment', assignmentSchema);
+
+export default assignmentModel;

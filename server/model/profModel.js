@@ -39,6 +39,7 @@ const profSchema = new mongoose.Schema(
 
     passwordConfirm: { type: String },
   },
+
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
@@ -59,4 +60,6 @@ profSchema.pre('save', async function (next) {
   next();
 });
 
-export const profModel = mongoose.model('Prof', profSchema);
+const profModel = mongoose.model('Prof', profSchema);
+
+export default profModel;

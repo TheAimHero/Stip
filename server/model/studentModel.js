@@ -2,8 +2,6 @@ import mongoose from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 
-import { studentAssiSchema } from '../schemas/studentAssiSchema.js';
-
 const studentSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -61,7 +59,11 @@ const studentSchema = new mongoose.Schema({
     required: [true, 'Gender is required'],
   },
 
-  assignments: { type: [studentAssiSchema], default: [] },
+  assignments: {
+    type: [mongoose.Schema.ObjectId],
+    ref: 'StudentAssi',
+    default: [],
+  },
 
   subjects: {
     type: [String],
@@ -90,4 +92,6 @@ studentSchema.pre('save', async function (next) {
   next();
 });
 
-export const studentModel = mongoose.model('Student', studentSchema);
+const studentModel = mongoose.model('Student', studentSchema);
+
+export default studentModel;

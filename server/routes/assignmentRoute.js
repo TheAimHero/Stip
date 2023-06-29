@@ -1,12 +1,12 @@
 import express from 'express';
 import multer from 'multer';
 
-import { catchAsync } from '../utils/catchAsync.js';
+import catchAsync from '../utils/catchAsync.js';
 
 import * as assignment from '../controller/assignmentController.js';
 import * as auth from '../controller/authController.js';
 
-export const assignmentRoute = express.Router({ mergeParams: true });
+const assignmentRoute = express.Router({ mergeParams: true });
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -35,3 +35,5 @@ assignmentRoute
   )
   .get(catchAsync(assignment.getAssignments))
   .delete(auth.restrict('prof'), catchAsync(assignment.deleteAssignment));
+
+export default assignmentRoute;

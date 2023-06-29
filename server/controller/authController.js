@@ -1,5 +1,5 @@
 import * as authUtils from '../utils/authUtils.js';
-import { catchAsync } from '../utils/catchAsync.js';
+import catchAsync from '../utils/catchAsync.js';
 
 export function protect(model) {
   return catchAsync(async (req, res, next) => {

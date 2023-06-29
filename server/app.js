@@ -11,9 +11,9 @@ import xss from 'xss-clean';
 import hpp from 'hpp';
 dotenv.config();
 
-import { profRoute } from './routes/profRoute.js';
+import profRoute from './routes/profRoute.js';
 import { errorController } from './controller/errorController.js';
-import { studentRoute } from './routes/studentRoute.js';
+import studentRoute from './routes/studentRoute.js';
 
 // eslint-disable-next-line no-unused-vars
 const __dirname = path.resolve();

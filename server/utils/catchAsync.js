@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-export function catchAsync(fn) {
+function catchAsync(fn) {
   return (req, res, next) => {
     fn(req, res, next).catch(err => {
       console.log(err.name);
@@ -10,3 +10,5 @@ export function catchAsync(fn) {
     });
   };
 }
+
+export default catchAsync;

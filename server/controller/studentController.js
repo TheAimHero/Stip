@@ -1,16 +1,21 @@
 import * as auth from './authController.js';
 import * as generic from './genericController.js';
 import * as authUtils from '../utils/authUtils.js';
-import { studentModel } from '../model/studentModel.js';
-import { assignmentModel } from '../model/assignmentModel.js';
+import studentModel from '../model/studentModel.js';
+import assignmentModel from '../model/assignmentModel.js';
+import studentAssiModel from '../model/studentAssiModel.js';
 
 async function updateAssi(req, user) {
   const assigns = await assignmentModel.find(
     { section: req.body.section, class: req.body.class },
     { _id: 1 }
   );
-  assigns.forEach(assi => user.assignments.push({ assignment: assi }));
-  user.save();
+  const promiseArr = assigns.map(async assign => {
+    const newAssign = await studentAssiModel.create({ assignment: assign });
+    await user.assignments.push(newAssign._id);
+  });
+  await Promise.all(promiseArr);
+  await user.save();
   return user;
 }
 

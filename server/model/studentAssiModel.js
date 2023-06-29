@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export const studentAssiSchema = new mongoose.Schema({
+const studentAssiSchema = new mongoose.Schema({
   assignment: {
     type: mongoose.Schema.ObjectId,
     ref: 'Assignment',
@@ -17,3 +17,7 @@ export const studentAssiSchema = new mongoose.Schema({
     required: [true, 'Status is required'],
   },
 });
+
+const studentAssiModel = mongoose.model('StudentAssi', studentAssiSchema);
+
+export default studentAssiModel;

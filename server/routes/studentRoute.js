@@ -2,27 +2,14 @@ import express from 'express';
 // import multer from 'multer';
 
 import * as Student from '../controller/studentController.js';
-import { catchAsync } from '../utils/catchAsync.js';
-import { assignmentRoute } from './assignmentRoute.js';
-import { restrict } from '../controller/authController.js';
+import catchAsync from '../utils/catchAsync.js';
+import assignmentRoute from './assignmentRoute.js';
 
-export const studentRoute = express.Router();
-
-// NOTE: For later Reference
-// const multerStorage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, 'uploads');
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, file.originalname);
-//   },
-// });
-
-// const upload = multer({ dest: 'uploads', storage: multerStorage });
+const studentRoute = express.Router();
 
 studentRoute.post(
   '/sign-up',
-  // TODO: Add multer for file upload and form data parsing
+  // @todo: Add multer for file upload and form data parsing
   // upload.single('photo'),
   catchAsync(Student.signup)
 );
@@ -35,5 +22,7 @@ studentRoute.get('/me', Student.protect, Student.getMe);
 
 studentRoute.use('/assignment', Student.protect, assignmentRoute);
 
-// NOTE: Not implementer just for dev purposes
+// @note: Not implementer just for dev purposes
 studentRoute.post('/deleteMe', Student.deleteMe);
+
+export default studentRoute;
