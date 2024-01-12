@@ -32,11 +32,6 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   return next({ ctx: { session: { ...ctx.session, user: ctx.session.user } } });
 });
 
-const stimulateDb = t.middleware(async ({ next }) => {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return next();
-});
-
 const enforceModRole = t.middleware(({ ctx, next }) => {
   if (ctx.session?.user.role === 'MOD') {
     return next({ ctx });
@@ -45,10 +40,7 @@ const enforceModRole = t.middleware(({ ctx, next }) => {
 });
 
 export const modProcedure = t.procedure
-  .use(stimulateDb)
   .use(enforceUserIsAuthed)
   .use(enforceModRole);
 
-export const protectedProcedure = t.procedure
-  .use(stimulateDb)
-  .use(enforceUserIsAuthed);
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
