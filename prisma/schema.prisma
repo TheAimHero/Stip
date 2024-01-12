@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 // Necessary for Next auth
@@ -110,7 +111,7 @@ model UserTask {
   User        User      @relation(fields: [userId], references: [id])
   Task        Task      @relation(fields: [taskId], references: [id])
   cancelledAt DateTime?
-  cancelled    Boolean   @default(false)
+  cancelled   Boolean   @default(false)
 
   @@id([userId, taskId])
   @@unique([userId, taskId])
