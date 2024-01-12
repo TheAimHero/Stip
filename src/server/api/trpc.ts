@@ -1,0 +1,54 @@
+import { initTRPC, TRPCError } from '@trpc/server';
+import superjson from 'superjson';
+import { ZodError } from 'zod';
+import { getServerAuthSession } from '@/server/auth';
+import { db } from '@/server/db';
+
+export const createTRPCContext = async (opts: { headers: Headers }) => {
+  const session = await getServerAuthSession();
+  return { db, session, ...opts };
+};
+
+const t = initTRPC.context<typeof createTRPCContext>().create({
+  transformer: superjson,
+  errorFormatter({ shape, error }) {
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        zodError:
+          error.cause instanceof ZodError ? error.cause.flatten() : null,
+      },
+    };
+  },
+});
+export const createTRPCRouter = t.router;
+export const publicProcedure = t.procedure;
+
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+  if (!ctx.session || !ctx.session.user) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
+  }
+  return next({ ctx: { session: { ...ctx.session, user: ctx.session.user } } });
+});
+
+const stimulateDb = t.middleware(async ({ next }) => {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  return next();
+});
+
+const enforceModRole = t.middleware(({ ctx, next }) => {
+  if (ctx.session?.user.role === 'MOD') {
+    return next({ ctx });
+  }
+  throw new TRPCError({ code: 'UNAUTHORIZED' });
+});
+
+export const modProcedure = t.procedure
+  .use(stimulateDb)
+  .use(enforceUserIsAuthed)
+  .use(enforceModRole);
+
+export const protectedProcedure = t.procedure
+  .use(stimulateDb)
+  .use(enforceUserIsAuthed);
