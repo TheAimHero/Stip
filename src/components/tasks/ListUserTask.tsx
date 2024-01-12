@@ -148,7 +148,6 @@ const ListUserTask: FC<ListUserTaskProps> = ({ filterBy, sortBy }) => {
     staleTime: timeInterval,
     refetchInterval: timeInterval,
   });
-  console.log(filterBy, sortBy);
   const filterTasks =
     tasks && new FilterTasksClass(tasks)[filterBy as filterTaskMethods]();
   const [sortByMethod, sortByParam] = sortBy.split('-');

@@ -17,7 +17,7 @@ import OptionMenu from '@/components/OptionMenu';
 import SortTasks from '@/components/tasks/SortTasks';
 import FilterTasks from '@/components/tasks/FilterTasks';
 
-export function Page() {
+const Page = () => {
   const [sortTodoBy, setSortTodoBy] = useState<string>('sortByDueDate-desc');
   const [filterTodoBy, setFilterTodoBy] = useState<string>('filterByAll');
   const [sortTaskBy, setSortTaskBy] = useState<string>('sortByDueDate-desc');
@@ -118,6 +118,6 @@ export function Page() {
       </Tabs>
     </MaxWidthWrapper>
   );
-}
+};
 
 export default Page;
