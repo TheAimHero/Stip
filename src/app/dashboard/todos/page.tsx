@@ -12,10 +12,10 @@ const Page = () => {
   const [filterTodoBy, setFilterTodoBy] = useState<string>('filterByAll');
   return (
     <Fragment>
-      <div className='m-4 flex items-center justify-between gap-10'>
+      <div className='flex w-full items-center justify-between sm:m-4'>
         <AddTodo />
         {
-          <OptionMenu className='not-sr-only mr-16 flex gap-7 sm:sr-only sm:mr-0'>
+          <OptionMenu className='not-sr-only flex gap-7 sm:sr-only'>
             <FilterTodos
               filterBy={filterTodoBy}
               setFilterBy={setFilterTodoBy}

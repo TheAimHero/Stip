@@ -15,7 +15,7 @@ const Page = () => {
   const { data } = useSession();
   return (
     <Fragment>
-      <div className='m-4 flex items-center justify-between gap-10'>
+      <div className='flex w-full items-center justify-between sm:m-4'>
         {data?.user.role === 'MOD' && <AddTask />}
         <OptionMenu className='not-sr-only mr-16 flex place-content-end gap-7 sm:sr-only sm:mr-0'>
           {data?.user.role === 'USER' && (
