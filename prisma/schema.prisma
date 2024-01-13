@@ -71,6 +71,7 @@ model Todo {
   userId      String
   title       String
   description String
+  note        String   @db.LongText
   createdAt   DateTime
   dueDate     DateTime
   completed   Boolean

@@ -182,7 +182,7 @@ function AddTodo() {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0' align='start'>
+                    <PopoverContent className='w-auto p-0'>
                       <Calendar
                         mode='single'
                         selected={field.value}

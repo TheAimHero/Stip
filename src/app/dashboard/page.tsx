@@ -37,7 +37,7 @@ const Page = () => {
   }
   return (
     <MaxWidthWrapper>
-      <Tabs defaultValue='tasks' className='my-4 w-full'>
+      <Tabs defaultValue='todos' className='my-4 w-full'>
         <TabsList className='flex w-full justify-evenly gap-5'>
           <TabsTrigger value='todos' className='flex-1'>
             <div className='flex items-center gap-3'>
@@ -53,7 +53,7 @@ const Page = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value='todos'>
-          <div className='m-4 flex items-center justify-between gap-10'>
+          <div className='m-4 flex items-center justify-between gap-6'>
             <AddTodo />
             {
               <OptionMenu className='not-sr-only mr-16 flex gap-7 sm:sr-only sm:mr-0'>
