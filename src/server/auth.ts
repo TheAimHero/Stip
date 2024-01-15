@@ -5,14 +5,16 @@ import {
   type NextAuthOptions,
 } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-// import CredentialsProvider from 'next-auth/providers/credentials';
-// import * as bcrypt from 'bcrypt';
 import { db } from '@/server/db';
 import { env } from '@/env';
 
 declare module 'next-auth' {
   interface Session extends DefaultSession {
-    user: { id: string; role: string } & DefaultSession['user'];
+    user: {
+      id: string;
+      role: string;
+      groupId: string | undefined;
+    } & DefaultSession['user'];
   }
 }
 

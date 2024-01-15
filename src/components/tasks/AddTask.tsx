@@ -101,7 +101,6 @@ const AddTask = () => {
       createdAt,
     } = values;
     addTask({ createdAt, description, dueDate, groupId, title });
-    console.log(values);
   }
   return (
     <Form {...form}>

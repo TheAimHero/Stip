@@ -34,6 +34,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 enum Role {
@@ -42,20 +44,23 @@ enum Role {
 }
 
 model User {
-  id            String     @id @default(cuid())
+  id            String       @id @default(cuid())
   name          String?
-  email         String?    @unique
+  email         String?      @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
   todos         Todo[]
-  role          Role       @default(USER)
+  role          Role         @default(USER)
   groupId       String?
   taskId        String?
   userTasks     UserTask[]
-  Group         Group?     @relation(fields: [groupId], references: [id])
+  Group         Group?       @relation(fields: [groupId], references: [id])
   Task          Task[]
+  Attendence    Attendence[]
+
+  @@index([groupId])
 }
 
 model VerificationToken {
@@ -76,13 +81,16 @@ model Todo {
   dueDate     DateTime
   completed   Boolean
   user        User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model Group {
-  id    String @id @default(cuid())
-  name  String @unique
-  Users User[]
-  Task  Task[]
+  id         String       @id @default(cuid())
+  name       String       @unique @default("NONE")
+  Users      User[]
+  Task       Task[]
+  Attendence Attendence[]
 }
 
 enum State {
@@ -97,11 +105,15 @@ model Task {
   dueDate      DateTime
   groupId      String
   createdAt    DateTime
+  rollNo       Int
   UserTask     UserTask[]
   assignedById String
   assignedBy   User       @relation(fields: [assignedById], references: [id])
   state        State      @default(OPEN)
   Group        Group      @relation(fields: [groupId], references: [id])
+
+  @@index([groupId])
+  @@index([assignedById])
 }
 
 model UserTask {
@@ -116,4 +128,19 @@ model UserTask {
 
   @@id([userId, taskId])
   @@unique([userId, taskId])
+  @@index([taskId])
+}
+
+model Attendence {
+  id        String   @id @default(cuid())
+  userId    String
+  groupId   String
+  present   Boolean
+  createdAt DateTime
+  User      User     @relation(fields: [userId], references: [id])
+  Group     Group    @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId, createdAt])
+  @@index([userId])
+  @@index([groupId])
 }
