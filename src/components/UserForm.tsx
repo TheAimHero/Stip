@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -29,31 +29,57 @@ import {
   Command,
   CommandItem,
 } from '@/components/ui/command';
-import { ChevronsDownUp, CheckIcon } from 'lucide-react';
+import { ChevronsDownUp, CheckIcon, Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 const formSchema = z.object({
   group_id: z.string().min(1, 'Group is required'),
+  rollNo: z.coerce.number().min(1, 'Roll number should be greater than 0'),
 });
 
 const UserForm = () => {
-  const { data: user } = api.user.getById.useQuery();
-  const { data: groups } = api.group.getAll.useQuery();
+  const { data: user, status: userStatus } = api.user.getById.useQuery(
+    undefined,
+    {
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 5 * 60 * 1000,
+    },
+  );
+  useEffect(() => {
+    if (userStatus === 'success') {
+      form.setValue('rollNo', user?.rollNo ?? 0);
+      form.setValue('group_id', user?.groupId ?? '');
+    }
+  }, [userStatus]);
+  const { data: groups, status: groupStatus } = api.group.getAll.useQuery(
+    undefined,
+    {
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 5 * 60 * 1000,
+    },
+  );
   const [selectOpen, setSelectOpen] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { group_id: user?.groupId?.toString() },
+    defaultValues: { group_id: '', rollNo: 0 },
   });
-  const { mutate: updateUser } = api.user.update.useMutation({
-    onError: (err) => console.log(err),
-    onSuccess: () => form.reset(),
-  });
+  const { mutate: updateUser, status: updateStatus } =
+    api.user.update.useMutation({
+      // onError: (err) => console.log(err),
+    });
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateUser({ groupId: values.group_id });
+    console.log(values);
+    updateUser({ groupId: values.group_id, rollNo: values.rollNo });
   }
   return (
     <Card className='p-5'>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className='m-4 w-[80%] space-y-8'
+        >
           <FormField
             control={form.control}
             name='group_id'
@@ -67,12 +93,14 @@ const UserForm = () => {
                         variant='outline'
                         role='combobox'
                         className={cn(
-                          'w-[200px] justify-between',
+                          'justify-between',
                           !field.value && 'text-muted-foreground',
                         )}
-                        disabled={!groups}
+                        disabled={
+                          groupStatus !== 'success' && userStatus !== 'success'
+                        }
                       >
-                        {groups && field.value
+                        {groups && field.value && user
                           ? groups.find((group) => group.id === field.value)
                             ?.name
                           : 'Select Group'}
@@ -119,8 +147,34 @@ const UserForm = () => {
               </FormItem>
             )}
           />
-          <Button className='m-5 p-4' type='submit'>
-            Submit
+          <FormField
+            control={form.control}
+            name='rollNo'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Roll Number</FormLabel>
+                <FormControl>
+                  <Input
+                    disabled={
+                      groupStatus !== 'success' && userStatus !== 'success'
+                    }
+                    placeholder='Roll Number'
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  This is your public display name.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button className='m-5 w-full p-4' type='submit'>
+            {updateStatus === 'loading' ? (
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+            ) : (
+              'Submit'
+            )}
           </Button>
         </form>
       </Form>
