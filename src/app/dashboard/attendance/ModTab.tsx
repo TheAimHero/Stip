@@ -30,7 +30,7 @@ const ModTab: FC<ModTabProps> = ({ selectedGroup, selectedDate }) => {
           variant: 'default',
         });
       },
-      onError: (err) => {
+      onError: () => {
         toast({
           title: 'Error',
           description: 'Something went wrong',

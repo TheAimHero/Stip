@@ -47,6 +47,7 @@ model User {
   id            String       @id @default(cuid())
   name          String?
   email         String?      @unique
+  rollNo        Int?
   emailVerified DateTime?
   image         String?
   accounts      Account[]
@@ -105,7 +106,6 @@ model Task {
   dueDate      DateTime
   groupId      String
   createdAt    DateTime
-  rollNo       Int
   UserTask     UserTask[]
   assignedById String
   assignedBy   User       @relation(fields: [assignedById], references: [id])
