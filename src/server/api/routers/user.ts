@@ -57,12 +57,15 @@ export const userRouter = createTRPCRouter({
     }),
 
   update: protectedProcedure
-    .input(z.object({ groupId: z.string() }))
+    .input(z.object({ groupId: z.string(), rollNo: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const { groupId } = input;
+      const { groupId, rollNo } = input;
       const tasks = await db.task.findMany({ where: { groupId } });
-      await db.user.update({ where: { id: userId }, data: { groupId } });
+      await db.user.update({
+        where: { id: userId },
+        data: { groupId, rollNo },
+      });
       await db.userTask.createMany({
         data: tasks.map((task) => ({
           completed: false,
