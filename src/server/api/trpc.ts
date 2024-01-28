@@ -3,7 +3,6 @@ import superjson from 'superjson';
 import { ZodError } from 'zod';
 import { getServerAuthSession } from '@/server/auth';
 import { db } from '@/server/db';
-import { env } from '@/env';
 
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const session = await getServerAuthSession();
@@ -45,4 +44,5 @@ export const modProcedure = t.procedure
   .use(enforceUserIsAuthed)
   .use(enforceModRole);
 
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const protectedProcedure = t.procedure
+  .use(enforceUserIsAuthed);

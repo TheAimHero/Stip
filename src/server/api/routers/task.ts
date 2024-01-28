@@ -59,7 +59,7 @@ export const taskRouter = createTRPCRouter({
       if (!assignedById) {
         throw new TRPCError({ code: 'BAD_REQUEST', message: 'User not found' });
       }
-      const newTask = await db
+      const newTaskArr = await db
         .insert(tasks)
         .values({
           description,
@@ -70,6 +70,13 @@ export const taskRouter = createTRPCRouter({
           createdAt,
         })
         .returning();
+      const newTask = newTaskArr[0];
+      if (!newTask) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Task not created',
+        });
+      }
       const users = await db.query.users.findMany({
         where: (t, { eq }) => eq(t.groupId, groupId),
       });
@@ -78,7 +85,7 @@ export const taskRouter = createTRPCRouter({
           userId: user.id,
           completedAt: null,
           cancelledAt: null,
-          taskId: newTask[0]?.id,
+          taskId: newTask.id,
         }),
       );
       if (userTasksArr.length > 0) {
