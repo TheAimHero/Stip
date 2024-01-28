@@ -21,15 +21,15 @@ import SortTasksClass, {
 } from '@/lib/tasks/sortTasks';
 
 interface TaskCardProps {
-  Group: {
-    id: string;
+  group: {
+    id: number;
     name: string;
   };
-  id: string;
+  id: number;
   title: string;
   description: string;
   dueDate: Date;
-  groupId: string;
+  groupId: number;
   createdAt: Date;
   assignedById: string;
 }
@@ -117,16 +117,15 @@ const ListModTask: FC<ListModTaskProps> = ({ sortBy }) => {
     (new SortTasksClass(tasks)[sortTaskMethod as SortTasksMethod](
       sortTaskParam as SortParam,
     ) as TaskCardProps[]);
-
   return (
     <div className='m-4 mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
       <Fragment>
         {status === 'loading'
           ? Array(6)
-            .fill(0)
-            .map((_, ind) => (
-              <Skeleton key={ind} className='h-72 rounded-md shadow-sm' />
-            ))
+              .fill(0)
+              .map((_, ind) => (
+                <Skeleton key={ind} className='h-72 rounded-md shadow-sm' />
+              ))
           : null}
         {tasks?.length === 0 ? (
           <div className='mt-13 col-span-1 items-center justify-between gap-4 text-center md:col-span-2 lg:col-span-3'>

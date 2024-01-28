@@ -11,18 +11,19 @@ import {
 } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { cn, formatDateTime } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Check, Edit, Loader2, Trash2 } from 'lucide-react';
+import { api } from '@/trpc/react';
+import TodoDialog from './TodoDialog';
+
 interface TodoCardProps {
   title: string;
-  id: string;
+  id: number;
   description: string;
   completed: boolean;
   dueDate: Date;
   createdAt: Date;
 }
-import { Button } from '@/components/ui/button';
-import { Check, Edit, Loader2, Trash2 } from 'lucide-react';
-import { api } from '@/trpc/react';
-import TodoDialog from './TodoDialog';
 
 const TodoCard: FC<TodoCardProps> = ({
   description,

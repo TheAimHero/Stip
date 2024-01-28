@@ -71,12 +71,11 @@ function AddTodo() {
       setOpen(false);
       await utils.todo.getAll.invalidate();
       toast({
-        title: 'Added Task',
-        description: `dueDate ${format(
+        title: 'Added Todo',
+        description: `Due Date ${format(
           form.getValues('dueDate').toString(),
           'yyyy-MM-dd',
         )}`,
-        // action: <ToastAction altText='Goto schedule to undo'>Undo</ToastAction>,
       });
       form.reset();
     },

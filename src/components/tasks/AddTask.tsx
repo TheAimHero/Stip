@@ -54,7 +54,7 @@ const formSchema = z.object({
     .max(100, 'Description must be less than 100 characters'),
   dueDate: z.date().min(new Date(), 'Due date must be in the future'),
   createdAt: z.date().default(new Date()),
-  group_id: z.string().min(1, 'Group is required'),
+  group_id: z.number().min(1, 'Group is required'),
   completed: z.boolean().default(false),
 });
 
@@ -70,10 +70,13 @@ const AddTask = () => {
       dueDate: undefined,
       createdAt: new Date(),
       completed: false,
-      group_id: '',
     },
   });
-  const { data: groups } = api.group.getAll.useQuery();
+  const { data: groups } = api.group.getAll.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+    enabled: modalOpen,
+    refetchOnReconnect: false,
+  });
   const { toast } = useToast();
   const utils = api.useUtils();
   const { mutate: addTask, status } = api.task.addTask.useMutation({
@@ -87,7 +90,6 @@ const AddTask = () => {
           form.getValues('dueDate').toString(),
           'yyyy-MM-dd',
         )}`,
-        // action: <ToastAction altText='Goto schedule to undo'>Undo</ToastAction>,
       });
     },
     onError: (err) => console.log(err),
@@ -217,7 +219,7 @@ const AddTask = () => {
                         >
                           {groups && field.value
                             ? groups.find((group) => group.id === field.value)
-                              ?.name
+                                ?.name
                             : 'Select Group'}
                           <ChevronsDownUp className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                         </Button>
@@ -244,7 +246,7 @@ const AddTask = () => {
                               <CheckIcon
                                 className={cn(
                                   'ml-auto h-4 w-4',
-                                  group.name === field.value
+                                  group.id === field.value
                                     ? 'opacity-100'
                                     : 'opacity-0',
                                 )}
