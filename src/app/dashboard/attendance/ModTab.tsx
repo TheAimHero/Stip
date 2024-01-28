@@ -1,4 +1,4 @@
-import React, { type FC, useState } from 'react';
+import React, { type FC, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import DataTable from './DataTable';
@@ -7,28 +7,55 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
 
 interface ModTabProps {
-  selectedGroup: string;
+  selectedGroup: number;
   selectedDate: Date;
 }
 
 const ModTab: FC<ModTabProps> = ({ selectedGroup, selectedDate }) => {
   const { toast } = useToast();
+  const utils = api.useUtils();
   const { data: users } = api.user.getByGroup.useQuery(selectedGroup, {
     cacheTime: 60 * 1000,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
-    refetchOnReconnect: false,
+    refetchOnReconnect: true,
+    enabled: !!selectedGroup,
   });
-  const [rowSelection, setRowSelection] = useState({});
+  const { data: prevAttendance, isSuccess } =
+    api.user.getGroupAttendance.useQuery(
+      { createdAt: selectedDate, groupId: selectedGroup },
+      {
+        refetchOnWindowFocus: false,
+        refetchOnMount: true,
+        refetchOnReconnect: true,
+        enabled: !!selectedGroup && !!selectedDate,
+      },
+    );
+  useEffect(() => {
+    if (isSuccess) {
+      const t = prevAttendance?.reduce(
+        (acc, curr) => {
+          acc[curr.userId] = curr.present;
+          return acc;
+        },
+        {} as Record<string, boolean>,
+      );
+      setRowSelection(t);
+    }
+  }, [isSuccess, prevAttendance]);
+  const [rowSelection, setRowSelection] = useState<
+    Record<string, boolean> | undefined
+  >();
   const { mutate: setAttendance, status: attendanceStatus } =
     api.user.setAttendance.useMutation({
-      onSuccess: () => {
+      onSuccess: async () => {
         toast({
           title: 'Success',
           description: 'Attendance marked successfully',
           variant: 'default',
         });
+        await utils.user.getGroupAttendance.invalidate();
       },
       onError: () => {
         toast({
@@ -39,32 +66,46 @@ const ModTab: FC<ModTabProps> = ({ selectedGroup, selectedDate }) => {
       },
     });
   function handleSubmit() {
-    if (selectedGroup && selectedDate && users) {
+    if (selectedGroup && selectedDate && users && rowSelection) {
+      // @fix: make sure react table returns selected and unselected users
+      // @hack: modify to include all users
+      const userIds = rowSelection;
+      users.forEach((user) => {
+        if (!userIds[user.id]) {
+          userIds[user.id] = false;
+        }
+      });
       setAttendance({
         createdAt: selectedDate,
         groupId: selectedGroup,
-        userIds: Object.entries(rowSelection)
-          .map(([ind, val]) => {
-            return Boolean(val) ? users[Number(ind)]?.id : undefined;
-          })
-          .filter(Boolean) as string[],
-        present: true,
+        userIds,
       });
     }
   }
-  if (!users || !selectedGroup || !selectedDate) {
+
+  if (!selectedGroup || !selectedDate) {
     return (
       <Skeleton className='m-1 mt-10 flex h-[30%] items-center justify-center sm:m-10'>
         Select a Group and Date
       </Skeleton>
     );
   }
+
+  if (!users || !prevAttendance || !rowSelection) {
+    return (
+      <Skeleton className='m-1 mt-10 flex h-[30%] items-center justify-center sm:m-10'>
+        <Loader2 className='h-6 w-6 animate-spin' />
+      </Skeleton>
+    );
+  }
+
   return (
     <div className='m-1 flex flex-col gap-4 sm:m-10'>
       <DataTable
         rowSelection={rowSelection}
         setRowSelection={setRowSelection}
         data={users}
+        prevAttendance={prevAttendance}
       />
       <Button
         disabled={attendanceStatus === 'loading'}

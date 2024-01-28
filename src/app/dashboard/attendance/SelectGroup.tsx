@@ -1,5 +1,5 @@
 import { api } from '@/trpc/react';
-import { CheckIcon, Menu } from 'lucide-react';
+import { CheckIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,8 +17,8 @@ import {
 import { type FC, useState } from 'react';
 
 interface SelectGroupProps {
-  selectedGroup: string;
-  setSelectedGroup: (selectedGroup: string) => void;
+  selectedGroup: number | undefined;
+  setSelectedGroup: (selectedGroup: number) => void;
 }
 
 const SelectGroup: FC<SelectGroupProps> = ({
@@ -44,35 +44,34 @@ const SelectGroup: FC<SelectGroupProps> = ({
           variant='outline'
           role='combobox'
           aria-expanded={open}
-          className='w-[200px] justify-between'
+          className='flex flex-1 justify-between gap-4 truncate sm:w-[200px] sm:flex-none'
         >
-          {selectedGroup
-            ? groups?.find((group) => group.id === selectedGroup)?.name
-            : 'Select Group...'}
-          <Menu className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+          {selectedGroup ? (
+            groups?.find((group) => group.id === selectedGroup)?.name
+          ) : (
+            <span className='truncate'>Select Group</span>
+          )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-[200px] p-0'>
+      <PopoverContent className='mx-2 w-[200px] p-0'>
         <Command>
-          <CommandInput placeholder='Search framework...' className='h-9' />
-          <CommandEmpty>No group found.</CommandEmpty>
+          <CommandInput placeholder='Search group...' className='h-9' />
+          <CommandEmpty>No Group found.</CommandEmpty>
           <CommandGroup>
             {groups?.map((group) => (
               <CommandItem
+                value={group.name}
                 key={group.id}
-                value={group.id}
-                onSelect={(currentValue) => {
-                  setSelectedGroup(
-                    currentValue === selectedGroup ? '' : currentValue,
-                  );
+                onSelect={() => {
                   setOpen(false);
+                  setSelectedGroup(group.id);
                 }}
               >
                 {group.name}
                 <CheckIcon
                   className={cn(
                     'ml-auto h-4 w-4',
-                    selectedGroup === group.name ? 'opacity-100' : 'opacity-0',
+                    group.id === selectedGroup ? 'opacity-100' : 'opacity-0',
                   )}
                 />
               </CommandItem>

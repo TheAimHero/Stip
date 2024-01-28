@@ -24,26 +24,24 @@ const DatePicer: FC<DatePickerProps> = ({ date, setDate }) => {
         <Button
           variant={'outline'}
           className={cn(
-            'w-[240px] justify-start text-left font-normal',
+            'justify-start space-x-3 font-normal',
             !date && 'text-muted-foreground',
           )}
         >
-          <CalendarIcon className='mr-2 h-4 w-4' />
+          <CalendarIcon className='h-4 w-4' />
           <span>{date ? format(date, 'PPP') : 'Pick a date'}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent
         align='start'
-        className='flex w-auto flex-col space-y-2 p-2'
+        className='m-2 flex w-auto flex-col space-y-2 p-2'
       >
-        <div className='rounded-md border'>
-          <Calendar
-            mode='single'
-            selected={date}
-            onSelect={(e) => e && setDate(new Date(e.setHours(0, 0, 0, 0)))}
-            toDate={new Date()}
-          />
-        </div>
+        <Calendar
+          mode='single'
+          selected={date}
+          onSelect={(e) => e && setDate(new Date(e.setHours(0, 0, 0, 0)))}
+          toDate={new Date()}
+        />
       </PopoverContent>
     </Popover>
   );

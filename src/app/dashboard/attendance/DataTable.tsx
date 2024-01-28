@@ -7,7 +7,7 @@ import React, {
   type Dispatch,
   type SetStateAction,
 } from 'react';
-import { ChevronDownIcon } from 'lucide-react';
+import { ArrowUpDown, ChevronDownIcon } from 'lucide-react';
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -42,74 +42,132 @@ import {
 export type Users = {
   id: string;
   name: string | null;
-  email: string | null;
+  email: string;
   emailVerified: Date | null;
   image: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  role: any;
-  groupId: string | null;
-  taskId: string | null;
+  role: 'USER' | 'MOD' | 'ADMIN';
+  groupId: number | null;
+  rollNo: number | null;
 };
 
-export const columns: ColumnDef<Users>[] = [
-  {
-    id: 'select',
-    accessorKey: 'id',
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label='Select all'
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label='Select row'
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: 'name',
-    header: 'Name',
-    cell: ({ row }) => <div className='capitalize'>{row.getValue('name')}</div>,
-  },
-];
+function getColumns(
+  prevAttendance: { userId: string; present: boolean }[],
+  setPrevAttendance: Dispatch<
+    SetStateAction<{ userId: string; present: boolean }[]>
+  >,
+): ColumnDef<Users>[] {
+  const columns: ColumnDef<Users>[] = [
+    {
+      id: 'select',
+      accessorKey: 'id',
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label='Select all'
+        />
+      ),
+      cell: ({ row }) => {
+        return (
+          <Checkbox
+            checked={
+              row.getIsSelected() ||
+              prevAttendance.some(
+                (attendance) =>
+                  attendance.userId === row.original.id && attendance.present,
+              )
+            }
+            onCheckedChange={(value) => {
+              setPrevAttendance(
+                prevAttendance.filter(
+                  (attendance) => attendance.userId !== row.original.id,
+                ),
+              );
+              return row.toggleSelected(!!value);
+            }}
+            aria-label='Select row'
+          />
+        );
+      },
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: 'name',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className='w-full'
+          >
+            Name
+            <ArrowUpDown className='h-4 w-4' />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className='text-center capitalize'>{row.getValue('name')}</div>
+      ),
+    },
+    {
+      accessorKey: 'rollNo',
+      header: ({ column }) => {
+        return (
+          <Button
+            className='w-full'
+            variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Roll Number
+            <ArrowUpDown className='ml-2 h-4 w-4' />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className='w-full text-center capitalize'>
+          {row.getValue('rollNo')}
+        </div>
+      ),
+    },
+  ];
+  return columns;
+}
 
 interface DataTableProps {
   data: Users[];
   rowSelection: {};
-  setRowSelection: Dispatch<SetStateAction<{}>>;
+  setRowSelection: Dispatch<SetStateAction<{} | undefined>>;
+  prevAttendance: { userId: string; present: boolean }[];
 }
 
 const DataTable: FC<DataTableProps> = ({
   data,
   rowSelection,
   setRowSelection,
+  prevAttendance,
 }) => {
+  const [localPrevAttendance, setLocalPrevAttendance] =
+    useState(prevAttendance);
+  const columns = getColumns(localPrevAttendance, setLocalPrevAttendance);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-
   const table = useReactTable({
     data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    getRowId: (user) => user.id,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: (value) => {
-      setRowSelection(value);
-    },
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
@@ -119,7 +177,7 @@ const DataTable: FC<DataTableProps> = ({
   });
   return (
     <div className='w-full'>
-      <div className='flex gap-5 items-center py-4'>
+      <div className='flex items-center gap-5 py-4'>
         <Input
           placeholder='Filter names...'
           value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
@@ -166,9 +224,9 @@ const DataTable: FC<DataTableProps> = ({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}
