@@ -1,4 +1,6 @@
-import { type Todo } from '@prisma/client';
+import { type todos } from '@/server/db/schema/todos';
+
+type Todo = typeof todos.$inferSelect;
 
 class Sort {
   todoArr: Todo[];

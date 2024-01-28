@@ -1,40 +1,55 @@
 import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { db } from '@/server/db';
+import { todos } from '@/server/db/schema/todos';
+import { and, eq } from 'drizzle-orm';
 
 export const todoRouter = createTRPCRouter({
   getAll: protectedProcedure.query(({ ctx }) => {
-    return db.todo.findMany({ where: { userId: ctx.session.user.id } });
+    return db
+      .select()
+      .from(todos)
+      .where(eq(todos.createdById, ctx.session.user.id));
   }),
 
-  getOne: protectedProcedure.input(z.string()).query(({ ctx, input }) => {
-    return db.todo.findFirst({
-      where: { userId: ctx.session.user.id, id: input },
-      include: { user: false },
-    });
+  getOne: protectedProcedure.input(z.number()).query(async ({ ctx, input }) => {
+    const temp = await db
+      .select()
+      .from(todos)
+      .where(
+        and(eq(todos.createdById, ctx.session.user.id), eq(todos.id, input)),
+      );
+    return temp[0];
   }),
 
   delete: protectedProcedure
-    .input(z.string())
+    .input(z.number())
     .mutation(async ({ ctx, input }) => {
-      await db.todo.delete({
-        where: { userId: ctx.session.user.id, id: input },
-      });
+      await db
+        .delete(todos)
+        .where(
+          and(eq(todos.id, input), eq(todos.createdById, ctx.session.user.id)),
+        );
     }),
 
   update: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: z.number(),
         completed: z.boolean().optional(),
         note: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await db.todo.update({
-        where: { userId: ctx.session.user.id, id: input.id },
-        data: { completed: input.completed, note: input.note },
-      });
+      await db
+        .update(todos)
+        .set({ completed: input.completed, notes: input.note ?? '' })
+        .where(
+          and(
+            eq(todos.id, input.id),
+            eq(todos.createdById, ctx.session.user.id),
+          ),
+        );
     }),
 
   create: protectedProcedure
@@ -48,16 +63,13 @@ export const todoRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await db.todo.create({
-        data: {
-          title: input.title,
-          description: input.description,
-          dueDate: input.dueDate,
-          completed: input.completed,
-          createdAt: input.createdAt,
-          userId: ctx.session.user.id,
-          note: '',
-        },
+      await db.insert(todos).values({
+        title: input.title,
+        description: input.description,
+        dueDate: input.dueDate,
+        completed: input.completed,
+        createdAt: input.createdAt,
+        createdById: ctx.session.user.id,
       });
     }),
 });
