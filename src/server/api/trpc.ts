@@ -3,6 +3,7 @@ import superjson from 'superjson';
 import { ZodError } from 'zod';
 import { getServerAuthSession } from '@/server/auth';
 import { db } from '@/server/db';
+import { env } from '@/env';
 
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const session = await getServerAuthSession();
@@ -22,6 +23,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
     };
   },
 });
+
 export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
 

@@ -1,5 +1,5 @@
 export type ModTask = {
-  Group: {
+  group: {
     id: string;
     name: string;
   };
@@ -13,20 +13,32 @@ export type ModTask = {
 };
 
 export type UserTask = {
-  Task: {
-    id: string;
-    title: string;
+  task: {
+    id: number;
+    groupId: number;
     description: string;
+    state: 'OPEN' | 'DELETED' | 'DONE';
+    title: string;
     dueDate: Date;
-    assignedById: string;
-    groupId: string;
     createdAt: Date;
-    state: string;
+    assignedById: string;
+    assignedBy: {
+      id: string;
+      name: string | null;
+      email: string;
+      emailVerified: Date | null;
+      image: string | null;
+      role: 'MOD' | 'USER' | 'ADMIN';
+      groupId: number;
+      rollNo: number | null;
+    };
   };
-  User: { id: string; name: string | null };
+  userId: string;
+  taskId: number;
   completed: boolean;
-  taskId: string;
   completedAt: Date | null;
+  cancelled: boolean;
+  cancelledAt: Date | null;
 };
 
 function isUserTask(taskArr: UserTask[] | ModTask[]): taskArr is UserTask[] {
@@ -59,14 +71,14 @@ class FilterTasks {
 
   filterCancelled(): UserTask[] | ModTask[] {
     if (isUserTask(this.taskArr)) {
-      return this.taskArr.filter((task) => task.Task.state === 'DELETED');
+      return this.taskArr.filter((task) => task.task.state === 'DELETED');
     }
     return this.taskArr;
   }
 
   filterNotCancelled(): UserTask[] | ModTask[] {
     if (isUserTask(this.taskArr)) {
-      return this.taskArr.filter((task) => task.Task.state === 'OPEN');
+      return this.taskArr.filter((task) => task.task.state === 'OPEN');
     }
     return this.taskArr;
   }
@@ -77,7 +89,7 @@ class FilterTasks {
 
   filterByOverdue(): UserTask[] | ModTask[] {
     if (isUserTask(this.taskArr)) {
-      return this.taskArr.filter((task) => task.Task.dueDate < new Date());
+      return this.taskArr.filter((task) => task.task.dueDate < new Date());
     }
     return this.taskArr;
   }
