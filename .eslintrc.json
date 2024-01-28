@@ -3,6 +3,7 @@
   "parserOptions": {
     "project": true
   },
+  "ignorePatterns": ["src/components/ui"],
   "plugins": ["@typescript-eslint"],
   "extends": [
     "plugin:@next/next/recommended",
