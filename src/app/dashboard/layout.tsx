@@ -10,6 +10,7 @@ import Link from 'next/link';
 
 const Layout = ({ children }: PropsWithChildren) => {
   const { status: authStatus } = useSession();
+  const defaultTab = usePathname().split('/').pop()!;
   if (authStatus === 'unauthenticated') redirect('/auth/login');
   if (authStatus === 'loading') {
     return (
@@ -22,21 +23,20 @@ const Layout = ({ children }: PropsWithChildren) => {
       </div>
     );
   }
-  const defaultTab = usePathname().split('/').pop()!;
   return (
     <MaxWidthWrapper>
       <Tabs defaultValue={defaultTab} className='my-4 w-full'>
         <TabsList className='flex w-full justify-evenly gap-5'>
           <TabsTrigger value='todos' asChild className='flex-1'>
             <Link href='/dashboard/todos' className='flex items-center gap-3'>
-              <CheckSquare className='h-4 w-4' />
-              <span className='sr-only sm:not-sr-only'>Todos</span>
+              <CheckSquare className='sr-only h-4 w-4 sm:not-sr-only' />
+              <span className='truncate'>Todos</span>
             </Link>
           </TabsTrigger>
           <TabsTrigger value='tasks' asChild className='flex-1'>
             <Link href='/dashboard/tasks' className='flex items-center gap-3'>
-              <BookCheck className='h-4 w-4' />
-              <span className='sr-only sm:not-sr-only'>Tasks</span>
+              <BookCheck className='sr-only h-4 w-4 sm:not-sr-only' />
+              <span className='truncate'>Tasks</span>
             </Link>
           </TabsTrigger>
           <TabsTrigger value='attendance' asChild className='flex-1'>
@@ -44,8 +44,8 @@ const Layout = ({ children }: PropsWithChildren) => {
               href='/dashboard/attendance'
               className='flex items-center gap-3'
             >
-              <Users className='h-4 w-4' />
-              <span className='sr-only sm:not-sr-only'>Attendance</span>
+              <Users className='sr-only h-4 w-4 sm:not-sr-only' />
+              <span className='truncate'>Attendance</span>
             </Link>
           </TabsTrigger>
         </TabsList>
