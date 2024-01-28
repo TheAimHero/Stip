@@ -33,8 +33,11 @@ import { ChevronsDownUp, CheckIcon, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 const formSchema = z.object({
-  group_id: z.string().min(1, 'Group is required'),
-  rollNo: z.coerce.number().min(1, 'Roll number should be greater than 0'),
+  group_id: z.number().min(1, 'Group is required').optional(),
+  rollNo: z.coerce
+    .number()
+    .min(1, 'Roll number should be greater than 0')
+    .optional(),
 });
 
 const UserForm = () => {
@@ -46,12 +49,16 @@ const UserForm = () => {
       cacheTime: 5 * 60 * 1000,
     },
   );
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { group_id: undefined, rollNo: undefined },
+  });
   useEffect(() => {
     if (userStatus === 'success') {
-      form.setValue('rollNo', user?.rollNo ?? 0);
-      form.setValue('group_id', user?.groupId ?? '');
+      form.setValue('rollNo', user?.rollNo ?? undefined);
+      form.setValue('group_id', user?.groupId ?? undefined);
     }
-  }, [userStatus]);
+  }, [form, user?.groupId, user?.rollNo, userStatus]);
   const { data: groups, status: groupStatus } = api.group.getAll.useQuery(
     undefined,
     {
@@ -61,16 +68,11 @@ const UserForm = () => {
     },
   );
   const [selectOpen, setSelectOpen] = useState(false);
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { group_id: '', rollNo: 0 },
-  });
   const { mutate: updateUser, status: updateStatus } =
     api.user.update.useMutation({
       // onError: (err) => console.log(err),
     });
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
     updateUser({ groupId: values.group_id, rollNo: values.rollNo });
   }
   return (
@@ -102,7 +104,7 @@ const UserForm = () => {
                       >
                         {groups && field.value && user
                           ? groups.find((group) => group.id === field.value)
-                            ?.name
+                              ?.name
                           : 'Select Group'}
                         <ChevronsDownUp className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                       </Button>
@@ -129,7 +131,7 @@ const UserForm = () => {
                             <CheckIcon
                               className={cn(
                                 'ml-auto h-4 w-4',
-                                group.name === field.value
+                                group.id === field.value
                                   ? 'opacity-100'
                                   : 'opacity-0',
                               )}

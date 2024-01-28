@@ -44,5 +44,4 @@ export const modProcedure = t.procedure
   .use(enforceUserIsAuthed)
   .use(enforceModRole);
 
-export const protectedProcedure = t.procedure
-  .use(enforceUserIsAuthed);
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
