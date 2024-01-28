@@ -1,47 +1,4 @@
-export type ModTask = {
-  id: number;
-  groupId: number;
-  description: string;
-  state: 'OPEN' | 'DELETED' | 'DONE';
-  title: string;
-  dueDate: Date;
-  createdAt: Date;
-  assignedById: string;
-  group: {
-    id: number;
-    name: string;
-    description: string;
-  };
-};
-
-export type UserTask = {
-  task: {
-    id: number;
-    groupId: number;
-    description: string;
-    state: 'OPEN' | 'DELETED' | 'DONE';
-    title: string;
-    dueDate: Date;
-    createdAt: Date;
-    assignedById: string;
-    assignedBy: {
-      id: string;
-      name: string | null;
-      email: string;
-      emailVerified: Date | null;
-      image: string | null;
-      role: 'MOD' | 'USER' | 'ADMIN';
-      groupId: number;
-      rollNo: number | null;
-    };
-  };
-  userId: string;
-  taskId: number;
-  completed: boolean;
-  completedAt: Date | null;
-  cancelled: boolean;
-  cancelledAt: Date | null;
-};
+import { type ModTask, type UserTask } from './taskTypes';
 
 function isUserTask(taskArr: ModTask[] | UserTask[]): taskArr is UserTask[] {
   return taskArr.every((task) => (task as UserTask).completed !== undefined);
