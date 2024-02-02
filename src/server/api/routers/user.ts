@@ -118,7 +118,9 @@ export const userRouter = createTRPCRouter({
             taskId: task.id,
           }),
         );
-        await db.insert(userTasks).values(userTasksArr).onConflictDoNothing();
+        if (userTasksArr.length > 0) {
+          await db.insert(userTasks).values(userTasksArr).onConflictDoNothing();
+        }
       }
     }),
 });
