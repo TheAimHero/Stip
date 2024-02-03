@@ -3,6 +3,9 @@
  * for Docker builds.
  */
 await import('./src/env.js');
+import removeImports from 'next-remove-imports'
+
+const remImports = removeImports()
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -15,4 +18,4 @@ const config = {
   ],
 };
 
-export default config;
+export default remImports(config);
