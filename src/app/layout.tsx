@@ -25,7 +25,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en'>
-      <body className={cn(`font-sans`, inter.variable)}>
+      <body
+        className={cn(
+          'box-border h-screen bg-[hsl(var(--background))] font-sans',
+          inter.variable,
+        )}
+      >
         <TRPCReactProvider cookies={cookies().toString()}>
           <ClientProviders>
             <Navbar />

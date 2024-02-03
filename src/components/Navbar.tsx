@@ -8,7 +8,7 @@ import { LogIn, LogOut, User } from 'lucide-react';
 const Navbar = async () => {
   const session = await getServerAuthSession();
   return (
-    <nav className='flex h-[60px] items-center justify-between px-4 sm:px-8'>
+    <nav className='flex h-[60px] items-center justify-between bg-[hsl(var(--card))] px-4 sm:px-8'>
       <Link href='/'>
         <span className='mx-4 text-xl font-semibold sm:mx-10'>stip.</span>
       </Link>

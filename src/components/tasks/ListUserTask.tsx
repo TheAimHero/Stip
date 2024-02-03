@@ -158,13 +158,6 @@ const ListUserTask: FC<ListUserTaskProps> = ({ filterBy, sortBy }) => {
   return (
     <div className='m-4 mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3'>
       <Fragment>
-        {status === 'loading'
-          ? Array(6)
-              .fill(0)
-              .map((_, ind) => (
-                <Skeleton key={ind} className='h-72 rounded-md shadow-sm' />
-              ))
-          : null}
         {tasks?.length === 0 ? (
           <div className='mt-13 col-span-1 items-center justify-between gap-4 text-center md:col-span-2 lg:col-span-3'>
             <div className='flex flex-col gap-4'>

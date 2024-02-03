@@ -4,7 +4,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper';
 import React, { type PropsWithChildren } from 'react';
 import { redirect, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { BookCheck, CheckSquare, Loader2, Users } from 'lucide-react';
+import { BookCheck, CheckSquare, Edit3, Loader2, Users } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 
@@ -46,6 +46,12 @@ const Layout = ({ children }: PropsWithChildren) => {
             >
               <Users className='sr-only h-4 w-4 sm:not-sr-only' />
               <span className='truncate'>Attendance</span>
+            </Link>
+          </TabsTrigger>
+          <TabsTrigger value='editor' asChild className='flex-1'>
+            <Link href='/dashboard/editor' className='flex items-center gap-3'>
+              <Edit3 className='sr-only h-4 w-4 sm:not-sr-only' />
+              <span className='truncate'>Md Editor</span>
             </Link>
           </TabsTrigger>
         </TabsList>
