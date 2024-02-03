@@ -5,7 +5,6 @@ import '@uiw/react-markdown-preview/markdown.css';
 import React, { type Dispatch, type SetStateAction } from 'react';
 import dynamic from 'next/dynamic';
 import { getCodeString } from 'rehype-rewrite';
-import * as commands from '@uiw/react-md-editor/commands';
 import { type FC } from 'react';
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), {
   ssr: false,

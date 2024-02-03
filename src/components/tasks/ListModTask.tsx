@@ -14,7 +14,6 @@ import {
   CardDescription,
   CardFooter,
 } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import SortTasksClass, {
   type SortParam,
   type SortTasksMethod,
@@ -106,7 +105,7 @@ interface ListModTaskProps {
 }
 
 const ListModTask: FC<ListModTaskProps> = ({ sortBy }) => {
-  const { data: tasks, status } = api.task.getAllModTask.useQuery(undefined, {
+  const { data: tasks } = api.task.getAllModTask.useQuery(undefined, {
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60,
     cacheTime: 1000 * 60,

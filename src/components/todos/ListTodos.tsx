@@ -2,7 +2,6 @@
 
 import React, { Fragment, type FC } from 'react';
 import { api } from '@/trpc/react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Ghost } from 'lucide-react';
 import Sort, {
   type sortMethodType,
@@ -17,7 +16,7 @@ interface ListTodosProps {
 }
 
 const ListTodos: FC<ListTodosProps> = ({ sortBy, filterBy }) => {
-  const { data: todos, status } = api.todo.getAll.useQuery(undefined, {
+  const { data: todos } = api.todo.getAll.useQuery(undefined, {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

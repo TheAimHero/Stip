@@ -12,7 +12,6 @@ import {
 import { format } from 'date-fns';
 import { cn, formatDateTime } from '@/lib/utils';
 import { api } from '@/trpc/react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Check, Ghost, Loader2 } from 'lucide-react';
 import FilterTasksClass, {
@@ -142,7 +141,7 @@ interface ListUserTaskProps {
 
 const ListUserTask: FC<ListUserTaskProps> = ({ filterBy, sortBy }) => {
   const timeInterval = 1000 * 30;
-  const { data: tasks, status } = api.task.getAllUserTask.useQuery(undefined, {
+  const { data: tasks } = api.task.getAllUserTask.useQuery(undefined, {
     staleTime: timeInterval,
     refetchInterval: timeInterval,
   });
