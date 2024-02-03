@@ -12,7 +12,6 @@ import {
 import { format } from 'date-fns';
 import { cn, formatDateTime } from '@/lib/utils';
 import { api } from '@/trpc/react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Check, Ghost, Loader2 } from 'lucide-react';
 import FilterTasksClass, {
@@ -142,7 +141,7 @@ interface ListUserTaskProps {
 
 const ListUserTask: FC<ListUserTaskProps> = ({ filterBy, sortBy }) => {
   const timeInterval = 1000 * 30;
-  const { data: tasks, status } = api.task.getAllUserTask.useQuery(undefined, {
+  const { data: tasks } = api.task.getAllUserTask.useQuery(undefined, {
     staleTime: timeInterval,
     refetchInterval: timeInterval,
   });
@@ -158,13 +157,6 @@ const ListUserTask: FC<ListUserTaskProps> = ({ filterBy, sortBy }) => {
   return (
     <div className='m-4 mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3'>
       <Fragment>
-        {status === 'loading'
-          ? Array(6)
-              .fill(0)
-              .map((_, ind) => (
-                <Skeleton key={ind} className='h-72 rounded-md shadow-sm' />
-              ))
-          : null}
         {tasks?.length === 0 ? (
           <div className='mt-13 col-span-1 items-center justify-between gap-4 text-center md:col-span-2 lg:col-span-3'>
             <div className='flex flex-col gap-4'>

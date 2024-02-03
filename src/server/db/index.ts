@@ -6,8 +6,9 @@ import * as tasks from './schema/tasks';
 import * as todos from './schema/todos';
 import * as users from './schema/users';
 import * as groups from './schema/groups';
+import * as files from './schema/files';
 
-const schema = { ...auth, ...tasks, ...todos, ...users, ...groups };
+const schema = { ...auth, ...tasks, ...todos, ...users, ...groups, ...files };
 
 const client = createClient({
   url: env.DATABASE_URL,

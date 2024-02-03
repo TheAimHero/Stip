@@ -1,6 +1,8 @@
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod';
 
+// @todo: Add refine string for google, and uploadthing
+
 export const env = createEnv({
   server: {
     DATABASE_URL: z
@@ -29,6 +31,18 @@ export const env = createEnv({
     ),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
+    UPLOADTHING_SECRET: z
+      .string()
+      .refine(
+        (str) => !str.includes('YOUR_MYSQL_URL_HERE'),
+        'You forgot to change the default URL',
+      ),
+    UPLOADTHING_APP_ID: z
+      .string()
+      .refine(
+        (str) => !str.includes('YOUR_MYSQL_URL_HERE'),
+        'You forgot to change the default URL',
+      ),
   },
 
   client: {},
@@ -41,6 +55,8 @@ export const env = createEnv({
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
+    UPLOADTHING_APP_ID: process.env.UPLOADTHING_APP_ID,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,

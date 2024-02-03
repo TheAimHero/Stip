@@ -2,7 +2,6 @@
 
 import React, { Fragment, type FC } from 'react';
 import { api } from '@/trpc/react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Ghost } from 'lucide-react';
 import Sort, {
   type sortMethodType,
@@ -17,21 +16,10 @@ interface ListTodosProps {
 }
 
 const ListTodos: FC<ListTodosProps> = ({ sortBy, filterBy }) => {
-  const { data: todos, status } = api.todo.getAll.useQuery(undefined, {
+  const { data: todos } = api.todo.getAll.useQuery(undefined, {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
-  if (status === 'loading') {
-    return (
-      <div className='m-4 mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
-        {Array(6)
-          .fill(0)
-          .map((_, ind) => (
-            <Skeleton key={ind} className='h-72 rounded-md shadow-sm' />
-          ))}
-      </div>
-    );
-  }
   const [sortMethod, sortParam] = sortBy.split('-');
   const filterTodos =
     todos && new Filter(todos)[filterBy as filterMethodType]();
