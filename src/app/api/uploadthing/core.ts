@@ -4,6 +4,14 @@ import { TRPCError } from '@trpc/server';
 import { createUploadthing, type FileRouter } from 'uploadthing/next';
 import { db } from '@/server/db';
 
+export type UtServerReturn = {
+  uploadedBy: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  fileId: number;
+};
+
 const f = createUploadthing();
 
 const auth = async () => {
@@ -20,18 +28,24 @@ export const fileRouter = {
       return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      await db.insert(files).values({
-        link: file.url,
-        name: file.name,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userId: metadata.userId,
-      });
+      const newFile = await db
+        .insert(files)
+        .values({
+          link: file.url,
+          name: file.name,
+          createdAt: new Date(),
+          key: file.key,
+          updatedAt: new Date(),
+          userId: metadata.userId,
+        })
+        .returning();
+      if (!newFile?.[0]) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
       return {
         uploadedBy: metadata.userId,
         fileName: file.name,
         fileUrl: file.url,
         fileSize: file.size,
+        fileId: newFile[0].id,
       };
     }),
 } satisfies FileRouter;

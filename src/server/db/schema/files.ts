@@ -6,6 +6,7 @@ export const files = sqliteTable('file', {
   id: integer('id', { mode: 'number' })
     .notNull()
     .primaryKey({ autoIncrement: true }),
+  key: text('key', { mode: 'text', length: 255 }).notNull(),
   link: text('link', { mode: 'text', length: 255 }).notNull(),
   name: text('name', { mode: 'text', length: 255 }).notNull(),
   createdAt: int('createdAt', { mode: 'timestamp' })

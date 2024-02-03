@@ -1,17 +1,23 @@
 'use client';
 
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/toaster';
 import { SessionProvider } from 'next-auth/react';
+import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 function ClientProviders({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
   return (
     <SessionProvider>
-      <NextThemesProvider attribute='class'>
-        {children}
-        <Toaster />
-      </NextThemesProvider>
+      <QueryClientProvider client={queryClient}>
+        <NextThemesProvider attribute='class'>
+          {children}
+          <Toaster />
+        </NextThemesProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </SessionProvider>
   );
 }

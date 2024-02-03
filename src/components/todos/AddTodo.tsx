@@ -100,7 +100,7 @@ function AddTodo() {
             <span className='font-semibold'>Add Todo</span>
           </Button>
         </DialogTrigger>
-        <DialogContent className='max-h-[90%] max-w-[90%] overflow-scroll sm:max-h-full sm:max-w-[425px] sm:overflow-auto'>
+        <DialogContent className='max-h-[90%] max-w-[90%] overflow-scroll scroll-smooth sm:max-h-full sm:max-w-[425px] sm:overflow-auto'>
           <DialogHeader>
             <DialogTitle>Add Todo</DialogTitle>
           </DialogHeader>

@@ -14,11 +14,21 @@ import { useDropzone, type DropzoneOptions } from 'react-dropzone';
 import { Cloud, File, Loader2 } from 'lucide-react';
 import { useUploadThing } from '@/hooks/useUploadthing';
 import { useToast } from '@/components/ui/use-toast';
+import { api } from '@/trpc/react';
 
 const UploadButton = () => {
   const { toast } = useToast();
+  const utils = api.useUtils();
   const [isUploading, setIsUploading] = useState(false);
   const { startUpload } = useUploadThing('fileUploader', {
+    onBeforeUploadBegin: (files) => {
+      setIsUploading(true);
+      toast({
+        title: 'Uploading file...',
+        description: 'Your file is being uploaded.',
+      });
+      return files;
+    },
     onUploadBegin: () => {
       setIsUploading(true);
       toast({
@@ -26,12 +36,16 @@ const UploadButton = () => {
         description: 'Your file is being uploaded.',
       });
     },
-    onClientUploadComplete: () => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    onClientUploadComplete: async (resArr) => {
+      const res = resArr[0];
       setIsUploading(false);
+      await utils.file.getAll.invalidate();
       toast({
-        title: 'File uploaded',
-        description: 'Your file has been uploaded.',
+        title: `File uploaded: ${res?.name}`,
+        description: `Your file has been uploaded. ${res?.size} bytes.`,
       });
+      acceptedFiles.pop();
     },
     onUploadError: () => {
       setIsUploading(false);
@@ -62,7 +76,7 @@ const UploadButton = () => {
         <Button
           disabled={isUploading}
           variant='default'
-          className='sm:min-w-[200px]'
+          className='md:min-w-[150px]'
         >
           {isUploading ? (
             <Loader2 className='mr-2 h-4 w-4 animate-spin' />
