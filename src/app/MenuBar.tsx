@@ -103,19 +103,19 @@ const MenuBar: FC<PropsWithChildren> = ({ children }) => {
             {pagesObj.map(({ icon, link, name, value }) => {
               return (
                 <Fragment key={value}>
-                  <DropdownMenuItem
-                    className={cn('w-full justify-between px-10')}
-                    onClick={() => setOpen(!open)}
+                  <Link
+                    href={link}
+                    className='flex items-center justify-between text-base'
                   >
-                    <Link
-                      href={link}
-                      className='flex items-center gap-5 text-base'
+                    <DropdownMenuItem
+                      className={cn('w-full gap-5 px-10')}
+                      onClick={() => setOpen(!open)}
                     >
                       {icon}
                       <span className='truncate'>{name}</span>
-                    </Link>
+                    </DropdownMenuItem>
                     {value === defaultTab && <Check className='h-6 w-6' />}
-                  </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuSeparator className='h-[2px] bg-muted last:hidden' />
                 </Fragment>
               );
