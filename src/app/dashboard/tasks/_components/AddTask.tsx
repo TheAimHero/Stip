@@ -1,4 +1,5 @@
 'use client';
+
 import {
   Dialog,
   DialogTrigger,
@@ -28,7 +29,7 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from '@radix-ui/react-popover';
+} from '@/components/ui/popoverDialog';
 import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, CheckIcon, ChevronsDownUp, Loader2 } from 'lucide-react';
@@ -158,43 +159,41 @@ const AddTask = () => {
               name='dueDate'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
-                  <FormLabel>Due Date</FormLabel>
-                  <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                  <FormLabel>Date of birth</FormLabel>
+                  <Popover onOpenChange={setCalendarOpen} open={calendarOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
                           variant={'outline'}
                           className={cn(
                             'w-[240px] pl-3 text-left font-normal',
-                            !field.value,
+                            !field.value && 'text-muted-foreground',
                           )}
                         >
                           {field.value ? (
-                            format(field.value, 'PPP')
+                            format(field.name, 'PPP')
                           ) : (
                             <span>Pick a date</span>
                           )}
-                          <CalendarIcon className='ml-auto h-4 w-4' />
+                          <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0' align='start'>
+                    <PopoverContent className='h-full w-auto p-0' align='start'>
                       <Calendar
                         mode='single'
                         selected={field.value}
-                        onSelect={(value) => {
-                          field.onChange(value);
-                          setCalendarOpen(false);
-                        }}
-                        initialFocus
+                        onSelect={field.onChange}
                         disabled={(date) =>
-                          date < new Date() || date < new Date('1900-01-01')
+                          date > new Date() || date < new Date('1900-01-01')
                         }
-                        className='border-slate-200 bg-[hsl(var(--popover))] opacity-95 shadow-sm'
+                        initialFocus
                       />
                     </PopoverContent>
                   </Popover>
-                  <FormDescription>Due date of the task.</FormDescription>
+                  <FormDescription>
+                    Your date of birth is used to calculate your age.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -285,7 +284,7 @@ const AddTask = () => {
                 </FormItem>
               )}
             />
-            <div className='flex justify-around gap-7'>
+            <div className='flex justify-between gap-5'>
               <Button
                 type='submit'
                 className='flex-1'

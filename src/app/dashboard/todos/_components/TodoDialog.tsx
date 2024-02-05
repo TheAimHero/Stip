@@ -7,8 +7,8 @@ import {
 } from '@/components/ui/dialog';
 import { api } from '@/trpc/react';
 import { Loader2 } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Textarea } from '../ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 interface TodoDialogProps {
