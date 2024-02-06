@@ -9,16 +9,23 @@ import {
   DrawerClose,
   Drawer,
 } from '@/components/ui/drawer';
+import { cn } from '@/lib/utils';
 
 interface Props {
   children: React.ReactNode;
+  className?: string;
 }
 
-const OptionsBar: FC<Props> = ({ children }) => {
+const OptionsBar: FC<Props> = ({ children, className }) => {
   const device = useMediaQuery('(min-width: 768px)');
   if (device) {
     return (
-      <div className='mt-5 flex h-[60px] w-full items-center gap-1 px-1 sm:gap-5 sm:px-5 lg:gap-10 lg:px-10'>
+      <div
+        className={cn(
+          'mt-5 flex h-[60px] w-full items-center gap-1 px-1 sm:gap-5 sm:px-5 lg:gap-10 lg:px-10',
+          className,
+        )}
+      >
         {children}
       </div>
     );
@@ -30,7 +37,9 @@ const OptionsBar: FC<Props> = ({ children }) => {
           <Button variant='outline'>Open Drawer</Button>
         </DrawerTrigger>
         <DrawerContent>
-          <div className='grid grid-cols-2 gap-3 p-4'>{children}</div>
+          <div className={cn('grid grid-cols-2 gap-3 p-4', className)}>
+            {children}
+          </div>
           <div>
             <DrawerFooter>
               <DrawerClose asChild>

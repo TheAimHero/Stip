@@ -51,10 +51,11 @@ export const taskRouter = createTRPCRouter({
         groupId: z.number(),
         dueDate: z.date(),
         createdAt: z.date(),
+        fileId: z.number().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { dueDate, description, title, createdAt, groupId } = input;
+      const { dueDate, description, title, createdAt, groupId, fileId } = input;
       const assignedById = ctx.session?.user.id;
       if (!assignedById) {
         throw new TRPCError({ code: 'BAD_REQUEST', message: 'User not found' });
@@ -62,12 +63,13 @@ export const taskRouter = createTRPCRouter({
       const newTaskArr = await db
         .insert(tasks)
         .values({
+          title,
           description,
           dueDate,
-          groupId,
-          title,
-          assignedById,
           createdAt,
+          assignedById,
+          groupId,
+          fileId,
         })
         .returning();
       const newTask = newTaskArr[0];

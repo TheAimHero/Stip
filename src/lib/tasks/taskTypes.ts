@@ -5,6 +5,7 @@ export type ModTask = {
     description: string;
   };
   id: number;
+  fileId: number | null;
   title: string;
   description: string;
   dueDate: Date;
@@ -22,6 +23,7 @@ export type UserTask = {
     dueDate: Date;
     createdAt: Date;
     assignedById: string;
+    fileId: number | null;
     state: 'OPEN' | 'DELETED' | 'DONE';
     assignedBy: {
       id: string;

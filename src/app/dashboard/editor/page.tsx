@@ -50,7 +50,12 @@ const Page = () => {
         <Editor data={fileData} setData={setFileData} />
       </div>
       <OptionsBar>
-        <UploadButton />
+        <UploadButton
+          fileTypes='markdown'
+          maxSizeMb={1}
+          setFile={setValue}
+          setCurrentOpenFile={setCurrentOpenFile}
+        />
         <OpenFile
           setCurrentOpenFile={setCurrentOpenFile}
           file={value}

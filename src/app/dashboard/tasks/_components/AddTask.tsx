@@ -9,7 +9,7 @@ import {
   DialogClose,
   DialogHeader,
 } from '@/components/ui/dialog';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
@@ -42,7 +42,7 @@ import {
   CommandInput,
   CommandItem,
 } from '@/components/ui/command';
-import { Checkbox } from '@/components/ui/checkbox';
+import UploadTaskFile from './UploadTaskFile';
 
 const formSchema = z.object({
   title: z
@@ -56,13 +56,20 @@ const formSchema = z.object({
   dueDate: z.date().min(new Date(), 'Due date must be in the future'),
   createdAt: z.date().default(new Date()),
   group_id: z.number().min(1, 'Group is required'),
-  completed: z.boolean().default(false),
+  fileId: z.number().optional(),
 });
 
 const AddTask = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectOpen, setSelectOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [fileId, setFileId] = useState<number | undefined>();
+  useEffect(() => {
+    if (fileId && !isUploading) {
+      form.setValue('fileId', fileId);
+    }
+  }, [fileId, isUploading]);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -70,7 +77,6 @@ const AddTask = () => {
       description: '',
       dueDate: undefined,
       createdAt: new Date(),
-      completed: false,
     },
   });
   const { data: groups } = api.group.getAll.useQuery(undefined, {
@@ -102,8 +108,17 @@ const AddTask = () => {
       group_id: groupId,
       title,
       createdAt,
+      fileId,
     } = values;
-    addTask({ createdAt, description, dueDate, groupId, title });
+
+    addTask({
+      createdAt,
+      description,
+      dueDate,
+      groupId,
+      title,
+      fileId,
+    });
   }
   return (
     <Form {...form}>
@@ -159,41 +174,43 @@ const AddTask = () => {
               name='dueDate'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
-                  <FormLabel>Date of birth</FormLabel>
-                  <Popover onOpenChange={setCalendarOpen} open={calendarOpen}>
+                  <FormLabel>Due Date</FormLabel>
+                  <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
                           variant={'outline'}
                           className={cn(
                             'w-[240px] pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground',
+                            !field.value,
                           )}
                         >
                           {field.value ? (
-                            format(field.name, 'PPP')
+                            format(field.value, 'PPP')
                           ) : (
                             <span>Pick a date</span>
                           )}
-                          <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                          <CalendarIcon className='ml-auto h-4 w-4' />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className='h-full w-auto p-0' align='start'>
+                    <PopoverContent className='w-auto p-0'>
                       <Calendar
                         mode='single'
                         selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date('1900-01-01')
-                        }
+                        onSelect={(value) => {
+                          field.onChange(value);
+                          setCalendarOpen(false);
+                        }}
                         initialFocus
+                        disabled={(date) =>
+                          date < new Date() || date < new Date('1900-01-01')
+                        }
+                        className='border-slate-200 bg-[hsl(var(--popover))] opacity-95 shadow-sm'
                       />
                     </PopoverContent>
                   </Popover>
-                  <FormDescription>
-                    Your date of birth is used to calculate your age.
-                  </FormDescription>
+                  <FormDescription>Due date of the task.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -263,32 +280,20 @@ const AddTask = () => {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name='completed'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow'>
-                  <FormControl>
-                    <Checkbox
-                      className='h-8 w-8 items-center'
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className='space-y-1 leading-none'>
-                    <FormLabel>Completed</FormLabel>
-                    <FormDescription>
-                      Check if the task is completed.
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
+            <UploadTaskFile
+              className='w-full'
+              fileTypes={'pdf'}
+              maxSizeMb={4}
+              isUploading={isUploading}
+              setIsUploading={setIsUploading}
+              setFileId={setFileId}
+              fileId={fileId}
             />
             <div className='flex justify-between gap-5'>
               <Button
                 type='submit'
                 className='flex-1'
-                disabled={status === 'loading'}
+                disabled={status === 'loading' || isUploading}
               >
                 {status === 'loading' ? (
                   <Loader2 className='mr-2 h-4 w-4 animate-spin' />

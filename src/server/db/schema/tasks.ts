@@ -8,6 +8,7 @@ import {
 import { groups } from './groups';
 import { users } from './users';
 import { relations, sql } from 'drizzle-orm';
+import { files } from './files';
 
 export const tasks = sqliteTable('task', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
@@ -23,6 +24,7 @@ export const tasks = sqliteTable('task', {
   assignedById: text('assignedById', { length: 255, mode: 'text' })
     .notNull()
     .references(() => users.id),
+  fileId: integer('fileId').references(() => files.id),
   state: text('state', { enum: ['OPEN', 'DELETED', 'DONE'] })
     .notNull()
     .default('OPEN'),
@@ -35,6 +37,7 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
     references: [users.id],
   }),
   userTask: many(userTasks),
+  file: one(files, { fields: [tasks.fileId], references: [files.id] }),
 }));
 
 export const userTasks = sqliteTable(
