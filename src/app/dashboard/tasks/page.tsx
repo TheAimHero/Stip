@@ -1,13 +1,13 @@
 'use client';
 
-import ListModTask from '@/components/tasks/ListModTask';
-import ListUserTask from '@/components/tasks/ListUserTask';
-import OptionMenu from '@/components/OptionMenu';
-import SortTasks from '@/components/tasks/SortTasks';
-import FilterTasks from '@/components/tasks/FilterTasks';
 import { useSession } from 'next-auth/react';
-import AddTask from '@/components/tasks/AddTask';
 import React, { Fragment, useState } from 'react';
+import OptionMenu from '@/components/OptionMenu';
+import ListModTask from './_components/ListModTask';
+import ListUserTask from './_components/ListUserTask';
+import SortTasks from './_components/SortTasks';
+import FilterTasks from './_components/FilterTasks';
+import AddTask from './_components/AddTask';
 
 const Page = () => {
   const [sortTaskBy, setSortTaskBy] = useState<string>('sortByDueDate-asc');

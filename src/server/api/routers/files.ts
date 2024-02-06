@@ -12,11 +12,9 @@ export const fileRouter = createTRPCRouter({
     });
   }),
 
-  getOne: protectedProcedure.input(z.number()).query(async ({ ctx, input }) => {
+  getOne: protectedProcedure.input(z.number()).query(async ({ input }) => {
     return db.query.files.findFirst({
-      where(f, { eq, and }) {
-        return and(eq(f.id, input), eq(f.userId, ctx.session.user.id));
-      },
+      where: (f, { eq }) => eq(f.id, input),
     });
   }),
 

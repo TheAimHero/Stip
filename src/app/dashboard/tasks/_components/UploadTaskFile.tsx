@@ -1,4 +1,4 @@
-import React, { type Dispatch, type SetStateAction, type FC } from 'react';
+import React, { type FC, type Dispatch, type SetStateAction } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -14,48 +14,39 @@ import { useDropzone, type DropzoneOptions } from 'react-dropzone';
 import { Cloud, File, Loader2 } from 'lucide-react';
 import { api } from '@/trpc/react';
 import { useFileUpload } from '@/hooks/useFileUpload';
-import { type FileType } from '@/lib/files/fileType';
+import { cn } from '@/lib/utils';
 
 interface Props {
   fileTypes: 'pdf' | 'markdown';
   maxSizeMb: number;
-  setFile: Dispatch<SetStateAction<FileType | undefined>>;
-  setCurrentOpenFile: Dispatch<SetStateAction<FileType | undefined>>;
+  isUploading: boolean;
+  setIsUploading: Dispatch<SetStateAction<boolean>>;
+  setFileId: Dispatch<SetStateAction<number | undefined>>;
+  fileId: number | undefined;
+  className?: string;
 }
 
-const UploadButton: FC<Props> = ({
+const UploadTaskFile: FC<Props> = ({
   fileTypes,
   maxSizeMb,
-  setFile,
-  setCurrentOpenFile,
+  setIsUploading,
+  className,
+  setFileId,
+  fileId,
 }) => {
   const utils = api.useUtils();
-  const { isUploading, startUpload } = useFileUpload(
-    undefined,
+  const { isUploading: fileUploading, startUpload } = useFileUpload(
+    () => setIsUploading(true),
     undefined,
     async (res) => {
       if (!res) return;
       await utils.file.getAll.invalidate();
+      setFileId(res.id);
+      setIsUploading(false);
       acceptedFiles.pop();
-      setCurrentOpenFile({
-        createdAt: new Date(res?.createdAt),
-        id: res?.id,
-        link: res?.link,
-        name: res?.name,
-        updatedAt: new Date(res?.updatedAt),
-        userId: res?.userId,
-        key: res?.key,
-      });
-      setFile({
-        createdAt: new Date(res?.createdAt),
-        id: res?.id,
-        link: res?.link,
-        name: res?.name,
-        updatedAt: new Date(res?.updatedAt),
-        userId: res?.userId,
-        key: res?.key,
-      });
     },
+    undefined,
+    'pdfUploader',
   );
   const dropzoneOptions: DropzoneOptions = {
     multiple: false,
@@ -65,7 +56,7 @@ const UploadButton: FC<Props> = ({
       fileTypes === 'pdf'
         ? { 'application/pdf': ['.pdf'] }
         : { 'text/plain': ['.txt', '.md'] },
-    disabled: isUploading,
+    disabled: fileUploading,
   };
   const { acceptedFiles, getRootProps, getInputProps } =
     useDropzone(dropzoneOptions);
@@ -78,12 +69,14 @@ const UploadButton: FC<Props> = ({
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          disabled={isUploading}
+          disabled={fileUploading || fileId !== undefined}
           variant='default'
-          className='md:min-w-[150px]'
+          className={cn('md:min-w-[150px]', className)}
         >
-          {isUploading ? (
+          {fileUploading ? (
             <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+          ) : fileId ? (
+            'File Uploaded'
           ) : (
             'Upload File'
           )}
@@ -111,7 +104,7 @@ const UploadButton: FC<Props> = ({
                   <span className='font-semibold'>Click to upload</span> or drag
                   and drop
                 </p>
-                <p className='text-xs'>PDF (up to 1MB)</p>
+                <p className='text-xs tracking-wide'>{`Only ${fileTypes.toUpperCase()} files are allowed. Max size ${maxSizeMb} Mb`}</p>
               </div>
               {acceptedFiles?.[0] ? (
                 <div className='flex max-w-xs items-center divide-x divide-zinc-200 overflow-hidden rounded-md bg-transparent outline outline-[1px] outline-zinc-200'>
@@ -149,4 +142,4 @@ const UploadButton: FC<Props> = ({
   );
 };
 
-export default UploadButton;
+export default UploadTaskFile;
