@@ -95,7 +95,20 @@ export const taskRouter = createTRPCRouter({
       }
     }),
 
-  delete: modProcedure.input(z.number()).mutation(async ({ ctx, input }) => {
+  deleteTask: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ ctx, input }) => {
+      return await db
+        .delete(userTasks)
+        .where(
+          and(
+            eq(userTasks.taskId, input),
+            eq(userTasks.userId, ctx.session.user.id),
+          ),
+        );
+    }),
+
+  deleteMod: modProcedure.input(z.number()).mutation(async ({ ctx, input }) => {
     const assignedById = ctx.session?.user.id;
     if (!assignedById) {
       throw new TRPCError({ code: 'BAD_REQUEST', message: 'User not found' });

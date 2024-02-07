@@ -111,7 +111,7 @@ const UploadButton: FC<Props> = ({
                   <span className='font-semibold'>Click to upload</span> or drag
                   and drop
                 </p>
-                <p className='text-xs'>PDF (up to 1MB)</p>
+                <p className='text-xs'>{`Only ${fileTypes.toUpperCase()} files allowed. Upto ${maxSizeMb} MB`}</p>
               </div>
               {acceptedFiles?.[0] ? (
                 <div className='flex max-w-xs items-center divide-x divide-zinc-200 overflow-hidden rounded-md bg-transparent outline outline-[1px] outline-zinc-200'>

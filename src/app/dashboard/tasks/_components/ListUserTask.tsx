@@ -13,7 +13,7 @@ import { format } from 'date-fns';
 import { cn, formatDateTime } from '@/lib/utils';
 import { api } from '@/trpc/react';
 import { Button } from '@/components/ui/button';
-import { Check, Ghost, Loader2 } from 'lucide-react';
+import { Check, Ghost, Loader2, Trash2 } from 'lucide-react';
 import FilterTasksClass, {
   type filterTaskMethods,
 } from '@/lib/tasks/filterTasks';
@@ -21,6 +21,7 @@ import SortTasksClass, {
   type SortParam,
   type SortTasksMethod,
 } from '@/lib/tasks/sortTasks';
+import DownloadButton from './DownloadButton';
 
 interface TaskCardProps {
   task: {
@@ -28,6 +29,7 @@ interface TaskCardProps {
     title: string;
     description: string;
     dueDate: Date;
+    fileId: number | undefined;
     assignedBy: {
       name: string;
     };
@@ -41,8 +43,16 @@ interface TaskCardProps {
 }
 
 const TaskCard: FC<TaskCardProps> = ({ task, completed }) => {
-  const { description, assignedBy, id, title, dueDate, createdAt, state } =
-    task;
+  const {
+    description,
+    assignedBy,
+    id,
+    title,
+    dueDate,
+    createdAt,
+    state,
+    fileId,
+  } = task;
   const { name } = assignedBy;
   const [isUpdating, setIsUpdating] = useState(false);
   const [duration, setDuration] = useState('');
@@ -62,16 +72,28 @@ const TaskCard: FC<TaskCardProps> = ({ task, completed }) => {
     setDuration(formatDateTime(dueDate));
     return () => clearInterval(interval);
   }, [dueDate]);
+  const { mutate: deleteTask, status: deleteStatus } =
+    api.task.deleteTask.useMutation({
+      async onSettled(_data, error, _variables, _context) {
+        if (!error) {
+          await utils.task.getAllUserTask.invalidate();
+        }
+      },
+    });
   return (
     <Card>
       <CardHeader>
         <CardTitle
-          className={cn('flex gap-3 truncate text-xl', {
-            'text-red-500': state === 'DELETED',
-          })}
+          className={cn(
+            'flex items-center justify-between gap-3 truncate text-xl',
+            {
+              'text-red-500': state === 'DELETED',
+            },
+          )}
         >
           <span className=''>{title}</span>
           {state === 'DELETED' && <span>Cancelled</span>}
+          {state !== 'DELETED' && fileId && <DownloadButton fileId={fileId} />}
         </CardTitle>
       </CardHeader>
       <CardContent className='flex flex-col gap-3'>
@@ -122,12 +144,26 @@ const TaskCard: FC<TaskCardProps> = ({ task, completed }) => {
         <div className='flex w-full items-center justify-between'>
           <div className='flex w-full flex-col'>
             <span className='text-md'>Time Left: </span>
-            <span className='text-xs'>{duration}</span>
+            <span className='text-pretty text-xs'>{duration}</span>
           </div>
           <div className='flex w-full flex-col'>
             <span className='text-md'>Assigned By: </span>
             <span className='text-xs'>{name}</span>
           </div>
+          {state === 'DELETED' && (
+            <Button
+              variant='destructive'
+              onClick={() => {
+                deleteTask(id);
+              }}
+            >
+              {deleteStatus === 'loading' ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : (
+                <Trash2 className='h-4 w-4' />
+              )}
+            </Button>
+          )}
         </div>
       </CardFooter>
     </Card>
@@ -155,7 +191,7 @@ const ListUserTask: FC<ListUserTaskProps> = ({ filterBy, sortBy }) => {
       sortByParam as SortParam,
     ) as TaskCardProps[]);
   return (
-    <div className='m-4 mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3'>
+    <div className='m-4 mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 p-4 lg:grid-cols-2'>
       <Fragment>
         {tasks?.length === 0 ? (
           <div className='mt-13 col-span-1 items-center justify-between gap-4 text-center md:col-span-2 lg:col-span-3'>
