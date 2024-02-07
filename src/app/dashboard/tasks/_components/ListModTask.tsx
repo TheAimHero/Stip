@@ -18,6 +18,7 @@ import SortTasksClass, {
   type SortParam,
   type SortTasksMethod,
 } from '@/lib/tasks/sortTasks';
+import DownloadButton from './DownloadButton';
 
 interface TaskCardProps {
   group: {
@@ -30,6 +31,7 @@ interface TaskCardProps {
   dueDate: Date;
   groupId: number;
   createdAt: Date;
+  fileId: number | undefined;
   assignedById: string;
 }
 
@@ -38,12 +40,13 @@ const TaskCard: FC<TaskCardProps> = ({
   id,
   title,
   dueDate,
+  fileId,
   createdAt,
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [duration, setDuration] = useState('');
   const utils = api.useUtils();
-  const { mutate: deleteTask } = api.task.delete.useMutation({
+  const { mutate: deleteTask } = api.task.deleteMod.useMutation({
     onSuccess: async () => {
       setIsDeleting(false);
       await utils.task.getAllModTask.invalidate();
@@ -60,8 +63,9 @@ const TaskCard: FC<TaskCardProps> = ({
   }, [dueDate]);
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className='flex flex-row items-center justify-between gap-3 md:gap-10'>
         <CardTitle className='truncate text-xl'>{title}</CardTitle>
+        {fileId && <DownloadButton fileId={fileId} />}
       </CardHeader>
       <CardContent className='flex flex-col gap-3'>
         <CardDescription className='truncate'>{description}</CardDescription>
@@ -117,7 +121,7 @@ const ListModTask: FC<ListModTaskProps> = ({ sortBy }) => {
       sortTaskParam as SortParam,
     ) as TaskCardProps[]);
   return (
-    <div className='m-4 mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
+    <div className='m-4 mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 p-4 lg:grid-cols-2'>
       <Fragment>
         {tasks?.length === 0 ? (
           <div className='mt-13 col-span-1 items-center justify-between gap-4 text-center md:col-span-2 lg:col-span-3'>

@@ -8,6 +8,13 @@
       "when": 1706998177422,
       "tag": "0000_natural_manta",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1707214073361,
+      "tag": "0001_famous_swarm",
+      "breakpoints": true
     }
   ]
 }

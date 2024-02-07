@@ -85,7 +85,7 @@ const SaveFile: FC<Props> = ({
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     onClientUploadComplete: async (resArr) => {
       const res = resArr[0]!;
-      const { fileId } = res.serverData;
+      const { id: fileId } = res.serverData;
       setUploadFileId(fileId);
       await utils.file.getAll.invalidate();
     },
