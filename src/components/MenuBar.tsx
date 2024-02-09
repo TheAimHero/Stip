@@ -61,7 +61,7 @@ const MenuBar: FC<PropsWithChildren> = ({ children }) => {
   if (device) {
     return (
       <MaxWidthWrapper>
-        <Tabs defaultValue={defaultTab} className='max-w-screen my-4 w-[98%]'>
+        <Tabs defaultValue={defaultTab} className='max-w-screen my-4 w-[98%] mx-auto'>
           <TabsList className='flex h-full w-full justify-evenly gap-5'>
             {pagesObj.map(({ icon, link, name, value }) => {
               return (

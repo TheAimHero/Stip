@@ -4,7 +4,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper';
 import React, { type PropsWithChildren } from 'react';
 import { redirect } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import MenuBar from '../MenuBar';
+import MenuBar from '@/components/MenuBar';
 import { Loader2 } from 'lucide-react';
 
 const Layout = ({ children }: PropsWithChildren) => {
