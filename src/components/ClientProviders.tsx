@@ -12,7 +12,13 @@ function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
-        <NextThemesProvider attribute='class'>
+        <NextThemesProvider
+          attribute='class'
+          enableSystem={false}
+          forcedTheme='dark'
+          storageKey='stip-theme'
+          defaultTheme='dark'
+        >
           {children}
           <Toaster />
         </NextThemesProvider>
