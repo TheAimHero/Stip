@@ -15,7 +15,6 @@ function ClientProviders({ children }: { children: React.ReactNode }) {
         <NextThemesProvider
           attribute='class'
           enableSystem={false}
-          forcedTheme='dark'
           storageKey='stip-theme'
           defaultTheme='dark'
         >
