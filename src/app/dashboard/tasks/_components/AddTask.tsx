@@ -43,6 +43,7 @@ import {
   CommandItem,
 } from '@/components/ui/command';
 import UploadTaskFile from './UploadTaskFile';
+import { resetForm } from '@/lib/tasks/resetForm';
 
 const formSchema = z.object({
   title: z
@@ -55,7 +56,7 @@ const formSchema = z.object({
     .max(100, 'Description must be less than 100 characters'),
   dueDate: z.date().min(new Date(), 'Due date must be in the future'),
   createdAt: z.date().default(new Date()),
-  group_id: z.number().min(1, 'Group is required'),
+  groupId: z.number().min(1, 'Group is required'),
   fileId: z.number().optional(),
 });
 
@@ -86,39 +87,23 @@ const AddTask = () => {
   });
   const { toast } = useToast();
   const utils = api.useUtils();
-  const { mutate: addTask, status } = api.task.addTask.useMutation({
-    onSuccess: async () => {
-      setModalOpen(false);
-      form.reset();
-      await utils.task.invalidate();
-      toast({
-        title: 'Added Task',
-        description: `dueDate ${format(
-          form.getValues('dueDate').toString(),
-          'yyyy-MM-dd',
-        )}`,
-      });
-    },
-    onError: (err) => console.log(err),
-  });
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const {
-      description,
-      dueDate,
-      group_id: groupId,
-      title,
-      createdAt,
-      fileId,
-    } = values;
-
-    addTask({
-      createdAt,
-      description,
-      dueDate,
-      groupId,
-      title,
-      fileId,
+  const { mutate: addTask, status: taskAddStatus } =
+    api.task.addTask.useMutation({
+      onSuccess: async () => {
+        setModalOpen(false);
+        toast({
+          title: 'Added Task',
+          description: `Due Date: ${format(form.getValues('dueDate').toString(), 'yyyy-MM-dd')}`,
+        });
+        await utils.task.invalidate();
+        form.reset();
+        if (fileId) await resetForm(fileId);
+        setFileId(undefined);
+        setIsUploading(false);
+      },
     });
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    addTask({ ...values });
   }
   return (
     <Form {...form}>
@@ -128,9 +113,14 @@ const AddTask = () => {
             onClick={() => setModalOpen(true)}
             variant='default'
             size={'lg'}
+            disabled={taskAddStatus === 'loading' || isUploading}
             className='m-4 rounded-sm'
           >
-            <span className='font-semibold'>Add Task</span>
+            {taskAddStatus === 'loading' || isUploading ? (
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+            ) : (
+              <span className='font-semibold'>Add Task</span>
+            )}
           </Button>
         </DialogTrigger>
         <DialogContent className='max-h-[90%] max-w-[90%] overflow-scroll sm:max-h-full sm:max-w-[542px]'>
@@ -217,7 +207,7 @@ const AddTask = () => {
             />
             <FormField
               control={form.control}
-              name='group_id'
+              name='groupId'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
                   <FormLabel>Group</FormLabel>
@@ -254,7 +244,7 @@ const AddTask = () => {
                               value={group.name}
                               key={group.id}
                               onSelect={() => {
-                                form.setValue('group_id', group.id);
+                                form.setValue('groupId', group.id);
                                 setSelectOpen(false);
                               }}
                             >
@@ -293,13 +283,25 @@ const AddTask = () => {
               <Button
                 type='submit'
                 className='flex-1'
-                disabled={status === 'loading' || isUploading}
+                disabled={taskAddStatus === 'loading' || isUploading}
               >
-                {status === 'loading' ? (
+                {taskAddStatus === 'loading' ? (
                   <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 ) : (
                   'Save changes'
                 )}
+              </Button>
+              <Button
+                className='flex-1'
+                onClick={async () => {
+                  form.reset();
+                  await resetForm(fileId);
+                  setIsUploading(true);
+                  setFileId(undefined);
+                  setIsUploading(false);
+                }}
+              >
+                Reset Form
               </Button>
               <DialogClose asChild>
                 <Button>Close</Button>

@@ -183,7 +183,6 @@ const ListUserTask: FC<ListUserTaskProps> = ({ filterBy, sortBy }) => {
   });
   const filterTasks =
     tasks && new FilterTasksClass(tasks)[filterBy as filterTaskMethods]();
-
   const [sortByMethod, sortByParam] = sortBy.split('-');
   const sortedTasks =
     filterTasks &&

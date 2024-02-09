@@ -24,7 +24,7 @@ export const tasks = sqliteTable('task', {
   assignedById: text('assignedById', { length: 255, mode: 'text' })
     .notNull()
     .references(() => users.id),
-  fileId: integer('fileId').references(() => files.id),
+  fileId: integer('fileId').references(() => files.id, { onDelete: 'cascade' }),
   state: text('state', { enum: ['OPEN', 'DELETED', 'DONE'] })
     .notNull()
     .default('OPEN'),

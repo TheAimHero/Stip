@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { utapi } from '@/server/uploadthing';
 import {
   createTRPCRouter,
   modProcedure,
@@ -8,6 +9,7 @@ import { db } from '@/server/db';
 import { TRPCError } from '@trpc/server';
 import { tasks, userTasks } from '@/server/db/schema/tasks';
 import { and, eq } from 'drizzle-orm';
+import { files } from '@/server/db/schema/files';
 
 export const taskRouter = createTRPCRouter({
   getAllUserTask: protectedProcedure.query(async ({ ctx }) => {
@@ -113,17 +115,27 @@ export const taskRouter = createTRPCRouter({
     if (!assignedById) {
       throw new TRPCError({ code: 'BAD_REQUEST', message: 'User not found' });
     }
-    const task = await db
+    const taskArr = await db
       .update(tasks)
       .set({ state: 'DELETED' })
       .where(and(eq(tasks.assignedById, assignedById), eq(tasks.id, input)))
       .returning();
-    if (!task[0]) {
+    const task = taskArr[0];
+    if (!task) {
       throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
     }
     await db
       .update(userTasks)
       .set({ cancelled: true })
-      .where(eq(userTasks.taskId, task[0].id));
+      .where(eq(userTasks.taskId, task.id));
+    if (task.fileId) {
+      const deletedFileArr = await db
+        .delete(files)
+        .where(eq(files.id, task.fileId))
+        .returning({ fileKey: files.key });
+      const deletedFile =
+        deletedFileArr && deletedFileArr.length > 0 && deletedFileArr[0];
+      if (deletedFile) await utapi.deleteFiles(deletedFile.fileKey);
+    }
   }),
 });
