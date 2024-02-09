@@ -15,6 +15,13 @@
       "when": 1707214073361,
       "tag": "0001_famous_swarm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1707469197479,
+      "tag": "0002_pale_spyke",
+      "breakpoints": true
     }
   ]
 }
