@@ -12,18 +12,9 @@ const Page = () => {
   const [filterTodoBy, setFilterTodoBy] = useState<string>('filterByAll');
   return (
     <Fragment>
-      <div className='flex w-full items-center justify-between sm:m-4'>
+      <div className='flex w-full items-center justify-between'>
         <AddTodo />
-        {
-          <OptionMenu className='not-sr-only flex gap-7 sm:sr-only'>
-            <FilterTodos
-              filterBy={filterTodoBy}
-              setFilterBy={setFilterTodoBy}
-            />
-            <SortTodos setSortBy={setSortTodoBy} sortBy={sortTodoBy} />
-          </OptionMenu>
-        }
-        <div className='sr-only flex gap-7 sm:not-sr-only'>
+        <OptionMenu className=''>
           <div className='flex items-center justify-between gap-3 text-sm'>
             <span>Sort By:</span>
             <SortTodos setSortBy={setSortTodoBy} sortBy={sortTodoBy} />
@@ -35,7 +26,7 @@ const Page = () => {
               setFilterBy={setFilterTodoBy}
             />
           </div>
-        </div>
+        </OptionMenu>
       </div>
       <ListTodos sortBy={sortTodoBy} filterBy={filterTodoBy} />
     </Fragment>

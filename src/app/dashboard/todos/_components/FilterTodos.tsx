@@ -17,7 +17,7 @@ interface SortTodosProps {
 const FitlerTodos: FC<SortTodosProps> = ({ filterBy, setFilterBy }) => {
   return (
     <Select value={filterBy} onValueChange={setFilterBy}>
-      <SelectTrigger className='w-[180px]'>
+      <SelectTrigger className='w-[150px]'>
         <SelectValue placeholder='Select Filter' />
       </SelectTrigger>
       <SelectContent>

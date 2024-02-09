@@ -17,16 +17,7 @@ const Page = () => {
     <Fragment>
       <div className='flex w-full items-center justify-between sm:m-4'>
         {data?.user.role === 'MOD' && <AddTask />}
-        <OptionMenu className='not-sr-only mr-16 flex place-content-end gap-7 sm:sr-only sm:mr-0'>
-          {data?.user.role === 'USER' && (
-            <FilterTasks
-              filterBy={filterTaskBy}
-              setFilterBy={setFilterTaskBy}
-            />
-          )}
-          <SortTasks setSortBy={setSortTaskBy} sortBy={sortTaskBy} />
-        </OptionMenu>
-        <div className='sr-only flex gap-7 sm:not-sr-only'>
+        <OptionMenu className=''>
           <div className='flex items-center justify-between gap-3 text-sm'>
             <span>Sort By:</span>
             <SortTasks setSortBy={setSortTaskBy} sortBy={sortTaskBy} />
@@ -40,7 +31,7 @@ const Page = () => {
               />
             </div>
           )}
-        </div>
+        </OptionMenu>
       </div>
       {data?.user.role === 'MOD' && <ListModTask sortBy={sortTaskBy} />}
       {data?.user.role === 'USER' && (

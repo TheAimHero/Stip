@@ -17,7 +17,7 @@ interface SortTodosProps {
 const SortTodos: FC<SortTodosProps> = ({ sortBy, setSortBy }) => {
   return (
     <Select value={sortBy} onValueChange={setSortBy}>
-      <SelectTrigger className='w-[180px]'>
+      <SelectTrigger className='w-[150px]'>
         <SelectValue placeholder='Select Sort' />
       </SelectTrigger>
       <SelectContent>

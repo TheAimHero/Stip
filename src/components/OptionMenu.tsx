@@ -6,6 +6,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@uidotdev/usehooks';
+import { MenuIcon } from 'lucide-react';
 
 interface Props {
   className?: string;
@@ -13,11 +15,20 @@ interface Props {
 }
 
 const OptionMenu: FC<Props> = ({ children, className }) => {
+  const device = useMediaQuery('(min-width: 768px)');
+  if (device) {
+    return (
+      <div className={cn('flex w-full justify-evenly md:gap-3', className)}>
+        {children}
+      </div>
+    );
+  }
   return (
-    <div className={cn('w-full', className)}>
+    <div className={cn('mx-auto flex w-full items-center', className)}>
       <DropdownMenu modal={true}>
         <DropdownMenuTrigger asChild>
-          <Button variant='outline' size={'lg'} className='m-4 flex gap-3'>
+          <Button size={'lg'} className='mx-auto flex gap-3'>
+            <MenuIcon className='h-4 w-4' />
             <span className='font-semibold'>Options</span>
           </Button>
         </DropdownMenuTrigger>
