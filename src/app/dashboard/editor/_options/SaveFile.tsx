@@ -33,7 +33,7 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { type FileType } from '@/lib/files/fileType';
 import { api } from '@/trpc/react';
-import { useUploadThing } from '@/hooks/useUploadthing';
+import { useFileUpload } from '@/hooks/useFileUpload';
 
 const FormSchema = z.object({
   fileName: z
@@ -64,48 +64,26 @@ const SaveFile: FC<Props> = ({
   const { toast } = useToast();
   const utils = api.useUtils();
   const [open, setOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadFileId, setUploadFileId] = useState<number | undefined>();
-  const { startUpload } = useUploadThing('fileUploader', {
-    onBeforeUploadBegin: (files) => {
-      setIsUploading(true);
-      toast({
-        title: 'Uploading file...',
-        description: 'Your file is being uploaded.',
-      });
-      return files;
-    },
-    onUploadBegin: () => {
-      setIsUploading(true);
-      toast({
-        title: 'Uploading file...',
-        description: 'Your file is being uploaded.',
-      });
-    },
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    onClientUploadComplete: async (resArr) => {
-      const res = resArr[0]!;
-      const { id: fileId } = res.serverData;
-      setUploadFileId(fileId);
+  // @todo: use the useFileUpload custom hook
+  const { isUploading, startUpload } = useFileUpload(
+    undefined,
+    undefined,
+    async (res) => {
+      if (!res) return;
       await utils.file.getAll.invalidate();
-    },
-    onUploadError: () => {
-      setIsUploading(false);
-      toast({
-        variant: 'destructive',
-        title: 'Upload failed',
-        description: 'Something went wrong. Try again...',
+      setFile({
+        ...res,
+        createdAt: new Date(res.createdAt),
+        updatedAt: new Date(res.updatedAt),
       });
+      setCurrentOpenFile({
+        ...res,
+        createdAt: new Date(res.createdAt),
+        updatedAt: new Date(res.updatedAt),
+      });
+      setOpen(false);
     },
-  });
-  const { data: uploadFile } = api.file.getOne.useQuery(uploadFileId ?? 0, {
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
-    refetchOnMount: false,
-    cacheTime: 5 * 60 * 1000,
-    staleTime: 5 * 60 * 1000,
-    enabled: !!uploadFileId,
-  });
+  );
   const { mutateAsync: deleteFile } = api.file.delete.useMutation({
     onError() {
       toast({
@@ -115,18 +93,6 @@ const SaveFile: FC<Props> = ({
       });
     },
   });
-  useEffect(() => {
-    if (uploadFile) {
-      setIsUploading(false);
-      toast({
-        title: `File uploaded: ${uploadFile.name}`,
-        description: `Your file has been uploaded.`,
-      });
-      setFile(uploadFile);
-      setCurrentOpenFile(uploadFile);
-      setOpen(false);
-    }
-  }, [uploadFile]);
   useEffect(() => {
     form.setValue('fileName', file?.name ?? '');
   }, [file?.name, form]);
@@ -139,8 +105,8 @@ const SaveFile: FC<Props> = ({
     if (!file && fileData) {
       await startUpload([newFile]);
     } else if (file && fileData) {
-      await deleteFile(file?.id);
       await startUpload([newFile]);
+      await deleteFile(file?.id);
     }
   }
   return (

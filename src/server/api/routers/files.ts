@@ -6,11 +6,14 @@ import { and, eq } from 'drizzle-orm';
 import { utapi } from '@/server/uploadthing';
 
 export const fileRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(({ ctx }) => {
-    return db.query.files.findMany({
-      where: (f, { eq }) => eq(f.userId, ctx.session.user.id),
-    });
-  }),
+  getAll: protectedProcedure
+    .input(z.enum(['markdown', 'pdf']))
+    .query(({ ctx, input }) => {
+      return db.query.files.findMany({
+        where: (f, { eq, and }) =>
+          and(eq(f.userId, ctx.session.user.id), eq(f.fileType, input)),
+      });
+    }),
 
   getOne: protectedProcedure.input(z.number()).query(async ({ input }) => {
     return db.query.files.findFirst({

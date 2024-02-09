@@ -11,6 +11,7 @@ export type ServerDataType =
       id: number;
       userId: string;
       name: string;
+      fileType: 'pdf' | 'markdown';
     }
   | undefined;
 

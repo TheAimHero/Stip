@@ -37,6 +37,7 @@ export const fileRouter = {
           key: file.key,
           updatedAt: new Date(),
           userId: metadata.userId,
+          fileType: 'markdown',
         })
         .returning();
       if (!newFile?.[0]) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
@@ -62,6 +63,7 @@ export const fileRouter = {
           key: file.key,
           updatedAt: new Date(),
           userId: metadata.userId,
+          fileType: 'pdf',
         })
         .returning();
       if (!newFile?.[0]) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });

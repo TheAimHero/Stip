@@ -9,6 +9,9 @@ export const files = sqliteTable('file', {
   key: text('key', { mode: 'text', length: 255 }).notNull(),
   link: text('link', { mode: 'text', length: 255 }).notNull(),
   name: text('name', { mode: 'text', length: 255 }).notNull(),
+  fileType: text('fileType', { mode: 'text', enum: ['pdf', 'markdown'] })
+    .notNull()
+    .default('pdf'),
   createdAt: int('createdAt', { mode: 'timestamp' })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),

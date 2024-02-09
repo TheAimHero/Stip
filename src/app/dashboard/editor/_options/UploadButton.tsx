@@ -38,22 +38,24 @@ const UploadButton: FC<Props> = ({
       await utils.file.getAll.invalidate();
       acceptedFiles.pop();
       setCurrentOpenFile({
-        createdAt: new Date(res?.createdAt),
-        id: res?.id,
-        link: res?.link,
-        name: res?.name,
-        updatedAt: new Date(res?.updatedAt),
-        userId: res?.userId,
-        key: res?.key,
+        createdAt: new Date(res.createdAt),
+        id: res.id,
+        link: res.link,
+        name: res.name,
+        updatedAt: new Date(res.updatedAt),
+        fileType: res.fileType,
+        userId: res.userId,
+        key: res.key,
       });
       setFile({
         createdAt: new Date(res?.createdAt),
-        id: res?.id,
-        link: res?.link,
-        name: res?.name,
-        updatedAt: new Date(res?.updatedAt),
-        userId: res?.userId,
-        key: res?.key,
+        id: res.id,
+        link: res.link,
+        fileType: res.fileType,
+        name: res.name,
+        updatedAt: new Date(res.updatedAt),
+        userId: res.userId,
+        key: res.key,
       });
     },
   );

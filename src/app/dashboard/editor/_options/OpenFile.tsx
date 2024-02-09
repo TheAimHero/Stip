@@ -37,7 +37,7 @@ const OpenFile: FC<Props> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const { data: files, status: fileStatus } = api.file.getAll.useQuery(
-    undefined,
+    'markdown',
     {
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
