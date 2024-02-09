@@ -12,7 +12,10 @@ interface Props {
 const DownloadButton: FC<Props> = ({ fileId }) => {
   const { data: file, status: fileStatus } = api.file.getOne.useQuery(
     fileId ?? 0,
-    { enabled: !!fileId },
+    {
+      refetchOnWindowFocus: false,
+      enabled: !!fileId,
+    },
   );
   if (fileStatus !== 'success' || !file) {
     return (

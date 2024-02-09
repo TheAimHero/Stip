@@ -75,7 +75,7 @@ const UploadTaskFile: FC<Props> = ({
         >
           {fileUploading ? (
             <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-          ) : fileId ? (
+          ) : fileId !== undefined ? (
             'File Uploaded'
           ) : (
             'Upload File'
@@ -125,16 +125,22 @@ const UploadTaskFile: FC<Props> = ({
             </label>
           </div>
         </div>
-        <DialogFooter>
-          <DialogClose>
+        <DialogFooter className='mx-auto flex w-full items-center justify-between gap-2 md:gap-10'>
+          <DialogClose asChild>
             <Button
               disabled={acceptedFiles?.[0] ? false : true}
+              className='flex-1'
               type='submit'
-              className='mx-auto'
               onClick={uploadFile}
             >
-              Upload
+              {fileUploading ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : null}
+              {acceptedFiles?.[0] ? 'Upload File' : 'Choose a file'}
             </Button>
+          </DialogClose>
+          <DialogClose asChild>
+            <Button>Close</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

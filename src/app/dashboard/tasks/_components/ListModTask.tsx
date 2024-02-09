@@ -43,17 +43,12 @@ const TaskCard: FC<TaskCardProps> = ({
   fileId,
   createdAt,
 }) => {
-  const [isDeleting, setIsDeleting] = useState(false);
   const [duration, setDuration] = useState('');
   const utils = api.useUtils();
-  const { mutate: deleteTask } = api.task.deleteMod.useMutation({
-    onSuccess: async () => {
-      setIsDeleting(false);
-      await utils.task.getAllModTask.invalidate();
-    },
-    onError: () => setIsDeleting(false),
-    onMutate: () => setIsDeleting(true),
-  });
+  const { mutate: deleteTask, status: deleteStatus } =
+    api.task.deleteMod.useMutation({
+      onSuccess: async () => await utils.task.getAllModTask.invalidate(),
+    });
   useEffect(() => {
     const interval = setInterval(() => {
       setDuration(formatDateTime(dueDate));
@@ -86,13 +81,12 @@ const TaskCard: FC<TaskCardProps> = ({
           </div>
           <Button
             onClick={() => {
-              setIsDeleting(true);
               deleteTask(id);
             }}
             className='w-20 p-0'
             variant={'destructive'}
           >
-            {isDeleting ? (
+            {deleteStatus === 'loading' ? (
               <Loader2 className='h-4 w-6 animate-spin' />
             ) : (
               <Trash2 className='h-4 w-8' />
