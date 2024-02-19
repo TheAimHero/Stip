@@ -14,7 +14,7 @@ const Page = () => {
     <Fragment>
       <div className='flex w-full items-center justify-between'>
         <AddTodo />
-        <OptionMenu className=''>
+        <OptionMenu className='justify-evenly'>
           <div className='flex items-center justify-between gap-3 text-sm'>
             <span>Sort By:</span>
             <SortTodos setSortBy={setSortTodoBy} sortBy={sortTodoBy} />

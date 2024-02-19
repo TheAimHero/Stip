@@ -7,7 +7,7 @@ import {
   unique,
 } from 'drizzle-orm/sqlite-core';
 import { accounts } from './auth';
-import { groups } from './groups';
+import { groupMembers, groups } from './groups';
 
 export const users = sqliteTable('user', {
   id: text('id', { length: 255 }).notNull().primaryKey(),
@@ -17,16 +17,12 @@ export const users = sqliteTable('user', {
     mode: 'timestamp',
   }).default(sql`CURRENT_TIMESTAMP`),
   image: text('image', { mode: 'text', length: 255 }),
-  role: text('role', { enum: ['USER', 'MOD', 'ADMIN'] })
-    .default('USER')
-    .notNull(),
-  groupId: integer('groupId').references(() => groups.id),
   rollNo: int('rollNo'),
 });
 
-export const usersRelations = relations(users, ({ one, many }) => ({
+export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
-  group: one(groups, { fields: [users.groupId], references: [groups.id] }),
+  groups: many(groupMembers),
 }));
 
 export const attendance = sqliteTable(

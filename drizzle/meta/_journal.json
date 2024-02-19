@@ -22,6 +22,13 @@
       "when": 1707469197479,
       "tag": "0002_pale_spyke",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1707511808298,
+      "tag": "0003_flippant_warbound",
+      "breakpoints": true
     }
   ]
 }

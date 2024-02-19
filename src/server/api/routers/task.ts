@@ -1,38 +1,59 @@
 import { z } from 'zod';
 import { utapi } from '@/server/uploadthing';
-import {
-  createTRPCRouter,
-  modProcedure,
-  protectedProcedure,
-} from '@/server/api/trpc';
+import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { db } from '@/server/db';
 import { TRPCError } from '@trpc/server';
 import { tasks, userTasks } from '@/server/db/schema/tasks';
 import { and, eq } from 'drizzle-orm';
 import { files } from '@/server/db/schema/files';
+import { getGrpMember, getGrpModMember } from '@/lib/db/preparedStatement';
 
 export const taskRouter = createTRPCRouter({
-  getAllUserTask: protectedProcedure.query(async ({ ctx }) => {
-    const userTaskList = await db.query.userTasks.findMany({
-      where: (t, { eq }) => eq(t.userId, ctx.session.user.id),
-      with: { task: { with: { assignedBy: true } } },
-    });
-    return userTaskList;
-  }),
+  getAllUserTask: protectedProcedure
+    .input(z.number())
+    .query(async ({ ctx, input }) => {
+      const grpMember = await getGrpMember.execute({
+        groupId: input,
+        userId: ctx.session.user.id,
+      });
+      if (!grpMember)
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'User not a member of group',
+        });
+      const userTaskList = await db.query.userTasks.findMany({
+        where: (t, { eq, and }) =>
+          and(eq(t.userId, ctx.session.user.id), eq(t.groupId, input)),
+        with: { task: { with: { assignedBy: true } } },
+      });
+      return userTaskList;
+    }),
 
-  getAllModTask: modProcedure.query(async ({ ctx }) => {
-    const modId = ctx.session?.user.id;
-    if (!modId) {
-      throw new TRPCError({ code: 'BAD_REQUEST', message: 'User not found' });
-    }
-    const modTaskList = await db.query.tasks.findMany({
-      where: (t, { eq, and }) => {
-        return and(eq(t.assignedById, modId), eq(t.state, 'OPEN'));
-      },
-      with: { group: true },
-    });
-    return modTaskList;
-  }),
+  getAllModTask: protectedProcedure
+    .input(z.number())
+    .query(async ({ ctx, input }) => {
+      const modId = ctx.session?.user.id;
+      const groupMember = await getGrpModMember.execute({
+        groupId: input,
+        userId: modId,
+      });
+      if (!groupMember) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User not found or not authorized',
+        });
+      }
+      const modTaskList = await db.query.tasks.findMany({
+        where: (t, { eq, and }) => {
+          return and(
+            and(eq(t.assignedById, modId), eq(t.state, 'OPEN')),
+            eq(t.groupId, input),
+          );
+        },
+        with: { group: true },
+      });
+      return modTaskList;
+    }),
 
   updateUserTask: protectedProcedure
     .input(z.object({ id: z.number(), completed: z.boolean() }))
@@ -45,7 +66,7 @@ export const taskRouter = createTRPCRouter({
         .where(and(eq(userTasks.userId, user.id), eq(userTasks.taskId, id)));
     }),
 
-  addTask: modProcedure
+  addTask: protectedProcedure
     .input(
       z.object({
         title: z.string(),
@@ -61,6 +82,22 @@ export const taskRouter = createTRPCRouter({
       const assignedById = ctx.session?.user.id;
       if (!assignedById) {
         throw new TRPCError({ code: 'BAD_REQUEST', message: 'User not found' });
+      }
+      const grpMember = await getGrpMember.execute({
+        groupId,
+        userId: assignedById,
+      });
+      if (!grpMember) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'User not a member of group',
+        });
+      }
+      if (grpMember.role !== 'MOD') {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User not authorized',
+        });
       }
       const newTaskArr = await db
         .insert(tasks)
@@ -81,15 +118,18 @@ export const taskRouter = createTRPCRouter({
           message: 'Task not created',
         });
       }
-      const users = await db.query.users.findMany({
-        where: (t, { eq }) => eq(t.groupId, groupId),
+      const grpMemberArr = await db.query.groupMembers.findMany({
+        where: (gm, { eq }) => eq(gm.groupId, groupId),
+        with: { user: true },
       });
+      const users = grpMemberArr.map((member) => member.user);
       const userTasksArr: (typeof userTasks.$inferInsert)[] = users.map(
         (user) => ({
           userId: user.id,
           completedAt: null,
           cancelledAt: null,
           taskId: newTask.id,
+          groupId: groupId,
         }),
       );
       if (userTasksArr.length > 0) {
@@ -110,32 +150,44 @@ export const taskRouter = createTRPCRouter({
         );
     }),
 
-  deleteMod: modProcedure.input(z.number()).mutation(async ({ ctx, input }) => {
-    const assignedById = ctx.session?.user.id;
-    if (!assignedById) {
-      throw new TRPCError({ code: 'BAD_REQUEST', message: 'User not found' });
-    }
-    const taskArr = await db
-      .update(tasks)
-      .set({ state: 'DELETED' })
-      .where(and(eq(tasks.assignedById, assignedById), eq(tasks.id, input)))
-      .returning();
-    const task = taskArr[0];
-    if (!task) {
-      throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
-    }
-    await db
-      .update(userTasks)
-      .set({ cancelled: true })
-      .where(eq(userTasks.taskId, task.id));
-    if (task.fileId) {
-      const deletedFileArr = await db
-        .delete(files)
-        .where(eq(files.id, task.fileId))
-        .returning({ fileKey: files.key });
-      const deletedFile =
-        deletedFileArr && deletedFileArr.length > 0 && deletedFileArr[0];
-      if (deletedFile) await utapi.deleteFiles(deletedFile.fileKey);
-    }
-  }),
+  deleteMod: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ ctx, input }) => {
+      const assignedById = ctx.session?.user.id;
+      if (!assignedById) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'User not found' });
+      }
+      const grpModMember = await getGrpModMember.execute({
+        groupId: input,
+        userId: assignedById,
+      });
+      if (!grpModMember) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User not found or not authorized',
+        });
+      }
+      const taskArr = await db
+        .update(tasks)
+        .set({ state: 'DELETED' })
+        .where(and(eq(tasks.assignedById, assignedById), eq(tasks.id, input)))
+        .returning();
+      const task = taskArr[0];
+      if (!task) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' });
+      }
+      await db
+        .update(userTasks)
+        .set({ cancelled: true })
+        .where(eq(userTasks.taskId, task.id));
+      if (task.fileId) {
+        const deletedFileArr = await db
+          .delete(files)
+          .where(eq(files.id, task.fileId))
+          .returning({ fileKey: files.key });
+        const deletedFile =
+          deletedFileArr && deletedFileArr.length > 0 && deletedFileArr[0];
+        if (deletedFile) await utapi.deleteFiles(deletedFile.fileKey);
+      }
+    }),
 });

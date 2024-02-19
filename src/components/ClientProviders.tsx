@@ -6,6 +6,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { SessionProvider } from 'next-auth/react';
 import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import GroupContextProvider from './Context';
+import { ClientOnly } from './ClientOnly';
 
 function ClientProviders({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
@@ -18,7 +20,9 @@ function ClientProviders({ children }: { children: React.ReactNode }) {
           storageKey='stip-theme'
           defaultTheme='dark'
         >
-          {children}
+          <ClientOnly>
+            <GroupContextProvider>{children}</GroupContextProvider>
+          </ClientOnly>
           <Toaster />
         </NextThemesProvider>
         <ReactQueryDevtools initialIsOpen={false} />

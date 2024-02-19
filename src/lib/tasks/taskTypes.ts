@@ -31,8 +31,6 @@ export type UserTask = {
       email: string;
       emailVerified: Date | null;
       image: string | null;
-      role: 'USER' | 'MOD' | 'ADMIN';
-      groupId: number | null;
       rollNo: number | null;
     };
   };

@@ -33,15 +33,4 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   return next({ ctx: { session: { ...ctx.session, user: ctx.session.user } } });
 });
 
-const enforceModRole = t.middleware(({ ctx, next }) => {
-  if (ctx.session?.user.role === 'MOD') {
-    return next({ ctx });
-  }
-  throw new TRPCError({ code: 'UNAUTHORIZED' });
-});
-
-export const modProcedure = t.procedure
-  .use(enforceUserIsAuthed)
-  .use(enforceModRole);
-
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);

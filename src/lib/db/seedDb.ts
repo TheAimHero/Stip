@@ -1,5 +1,5 @@
-import { db } from '../server/db';
-import { groups } from '../server/db/schema/groups';
+import { db } from '@/server/db';
+import { groupMembers, groups } from '@/server/db/schema/groups';
 
 async function main() {
   console.log('Seeding database...');
@@ -20,6 +20,25 @@ async function main() {
       { name: 'SE-C', description: '' },
     ])
     .onConflictDoNothing();
+  const user = await db.query.users.findFirst({
+    where: (u, { eq }) => eq(u.email, 'vsghodekar1@gmail.com'),
+  });
+  if (user) {
+    const groupIds = await db.query.groups.findMany();
+    const insertArr: (typeof groupMembers.$inferSelect)[] = groupIds.map(
+      (grp) => ({
+        groupId: grp.id,
+        joined: true,
+        role: 'MOD',
+        userId: user.id,
+        joinedAt: new Date(),
+        leftAt: null,
+      }),
+    );
+    if (insertArr.length > 0) {
+      await db.insert(groupMembers).values(insertArr).onConflictDoNothing();
+    }
+  }
 }
 
 main()

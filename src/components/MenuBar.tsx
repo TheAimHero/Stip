@@ -1,3 +1,5 @@
+'use client';
+
 import React, {
   Fragment,
   type FC,
@@ -5,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  ArrowRight,
   BookCheck,
   Check,
   CheckSquare,
@@ -61,7 +64,10 @@ const MenuBar: FC<PropsWithChildren> = ({ children }) => {
   if (device) {
     return (
       <MaxWidthWrapper>
-        <Tabs defaultValue={defaultTab} className='max-w-screen my-4 w-[98%] mx-auto'>
+        <Tabs
+          defaultValue={defaultTab}
+          className='max-w-screen mx-auto my-4 w-[98%]'
+        >
           <TabsList className='flex h-full w-full justify-evenly gap-5'>
             {pagesObj.map(({ icon, link, name, value }) => {
               return (
@@ -96,6 +102,10 @@ const MenuBar: FC<PropsWithChildren> = ({ children }) => {
               <div className='flex flex-row items-center gap-3'>
                 <Menu className='h-4 w-4' />
                 <span>Menu</span>
+                <ArrowRight className='h-4 w-4' />
+                <span>
+                  {pagesObj.find((page) => page.value === defaultTab)?.name}
+                </span>
               </div>
             </Button>
           </DropdownMenuTrigger>

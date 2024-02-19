@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import {
-  createTRPCRouter,
-  modProcedure,
-  protectedProcedure,
-} from '@/server/api/trpc';
+import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { db } from '@/server/db';
 import { TRPCError } from '@trpc/server';
 import { users, attendance } from '@/server/db/schema/users';
@@ -17,7 +13,7 @@ export const userRouter = createTRPCRouter({
     });
   }),
 
-  setAttendance: modProcedure
+  setAttendance: protectedProcedure
     .input(
       z.object({
         groupId: z.number(),
@@ -45,24 +41,29 @@ export const userRouter = createTRPCRouter({
     }),
 
   getUserAttendance: protectedProcedure
-    .input(z.date().optional())
-    .query(async ({ input: createdAt, ctx }) => {
+    .input(z.object({ createdAt: z.date().optional(), groupId: z.number() }))
+    .query(async ({ input, ctx }) => {
       const { id: userId } = ctx.session.user;
+      const { groupId, createdAt } = input;
       if (!createdAt) {
         return db.query.attendance.findMany({
-          where: (a, { eq }) => eq(a.userId, userId),
+          where: (a, { and, eq }) =>
+            and(eq(a.userId, userId), eq(a.groupId, groupId)),
         });
       }
       return db.query.attendance.findMany({
         where: (a, { eq, and }) =>
           and(
-            eq(a.userId, userId),
-            eq(a.createdAt, new Date(createdAt.setHours(0, 0, 0, 0))),
+            and(
+              eq(a.userId, userId),
+              eq(a.createdAt, new Date(createdAt.setHours(0, 0, 0, 0))),
+            ),
+            eq(a.groupId, groupId),
           ),
       });
     }),
 
-  getGroupAttendance: modProcedure
+  getGroupAttendance: protectedProcedure
     .input(z.object({ createdAt: z.date(), groupId: z.number() }))
     .query(({ input, ctx }) => {
       const { createdAt } = input;
@@ -84,8 +85,12 @@ export const userRouter = createTRPCRouter({
 
   getByGroup: protectedProcedure
     .input(z.number())
-    .query(({ input: groupId }) => {
-      return db.select().from(users).where(eq(users.groupId, groupId));
+    .query(async ({ input: groupId }) => {
+      const memberArr = await db.query.groupMembers.findMany({
+        where: (gm, { eq }) => eq(gm.groupId, groupId),
+        with: { user: true },
+      });
+      return memberArr.map((member) => member.user);
     }),
 
   update: protectedProcedure
@@ -100,10 +105,7 @@ export const userRouter = createTRPCRouter({
       const { groupId, rollNo } = input;
       await db
         .update(users)
-        .set({
-          rollNo: rollNo ?? undefined,
-          groupId: groupId ?? undefined,
-        })
+        .set({ rollNo: rollNo ?? undefined })
         .where(eq(users.id, userId));
       if (groupId) {
         // @todo: remove tasks from old group when updating groups
@@ -113,6 +115,7 @@ export const userRouter = createTRPCRouter({
         const userTasksArr: (typeof userTasks.$inferInsert)[] = tasks.map(
           (task) => ({
             userId,
+            groupId,
             completedAt: null,
             cancelledAt: null,
             taskId: task.id,

@@ -22,6 +22,7 @@ import SortTasksClass, {
   type SortTasksMethod,
 } from '@/lib/tasks/sortTasks';
 import DownloadButton from './DownloadButton';
+import { useGroups } from '@/components/Context';
 
 interface TaskCardProps {
   task: {
@@ -177,10 +178,14 @@ interface ListUserTaskProps {
 
 const ListUserTask: FC<ListUserTaskProps> = ({ filterBy, sortBy }) => {
   const timeInterval = 1000 * 30;
-  const { data: tasks } = api.task.getAllUserTask.useQuery(undefined, {
-    staleTime: timeInterval,
-    refetchInterval: timeInterval,
-  });
+  const { groupMember } = useGroups();
+  const { data: tasks } = api.task.getAllUserTask.useQuery(
+    groupMember?.groupId ?? -1,
+    {
+      staleTime: timeInterval,
+      refetchInterval: timeInterval,
+    },
+  );
   const filterTasks =
     tasks && new FilterTasksClass(tasks)[filterBy as filterTaskMethods]();
   const [sortByMethod, sortByParam] = sortBy.split('-');

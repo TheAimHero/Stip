@@ -4,11 +4,12 @@ import React, { type FC } from 'react';
 
 interface UserTabProps {
   date: Date | undefined;
+  groupId: number;
 }
 
-const UserTab: FC<UserTabProps> = ({ date }) => {
+const UserTab: FC<UserTabProps> = ({ date, groupId }) => {
   const { data } = api.user.getUserAttendance.useQuery(
-    date ? new Date(date.setHours(0, 0, 0, 0)) : undefined,
+    { groupId, createdAt: date },
     {
       retry: false,
       refetchOnWindowFocus: false,

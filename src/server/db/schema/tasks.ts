@@ -49,6 +49,9 @@ export const userTasks = sqliteTable(
     taskId: integer('taskId', { mode: 'number' })
       .references(() => tasks.id)
       .notNull(),
+    groupId: integer('groupId')
+      .notNull()
+      .references(() => groups.id),
     completed: int('completed', { mode: 'boolean' }).notNull().default(false),
     completedAt: integer('completedAt', { mode: 'timestamp' }),
     cancelled: int('cancelled', { mode: 'boolean' }).notNull().default(false),
@@ -60,4 +63,5 @@ export const userTasks = sqliteTable(
 export const userTasksRelations = relations(userTasks, ({ one }) => ({
   user: one(users, { fields: [userTasks.userId], references: [users.id] }),
   task: one(tasks, { fields: [userTasks.taskId], references: [tasks.id] }),
+  group: one(groups, { fields: [userTasks.groupId], references: [groups.id] }),
 }));

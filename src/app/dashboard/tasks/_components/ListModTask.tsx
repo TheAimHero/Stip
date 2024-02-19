@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { Loader2, Trash2, Ghost } from 'lucide-react';
 import { type FC, useState, useEffect, Fragment } from 'react';
 import { Button } from '@/components/ui/button';
+import { useGroups } from '@/components/Context';
 import {
   Card,
   CardHeader,
@@ -103,11 +104,15 @@ interface ListModTaskProps {
 }
 
 const ListModTask: FC<ListModTaskProps> = ({ sortBy }) => {
-  const { data: tasks } = api.task.getAllModTask.useQuery(undefined, {
-    refetchOnWindowFocus: false,
-    staleTime: 1000 * 60,
-    cacheTime: 1000 * 60,
-  });
+  const { groupMember } = useGroups();
+  const { data: tasks } = api.task.getAllModTask.useQuery(
+    groupMember?.groupId ?? -1,
+    {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60,
+      cacheTime: 1000 * 60,
+    },
+  );
   const [sortTaskMethod, sortTaskParam] = sortBy.split('-');
   const sortedTasks =
     tasks &&

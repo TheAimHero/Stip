@@ -32,18 +32,12 @@ import {
 } from '@/components/ui/popoverDialog';
 import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, CheckIcon, ChevronsDownUp, Loader2 } from 'lucide-react';
+import { CalendarIcon, Loader2 } from 'lucide-react';
 import { api } from '@/trpc/react';
 import { useToast } from '@/components/ui/use-toast';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from '@/components/ui/command';
 import UploadTaskFile from './UploadTaskFile';
 import { resetForm } from '@/lib/tasks/resetForm';
+import { useGroups } from '@/components/Context';
 
 const formSchema = z.object({
   title: z
@@ -62,15 +56,18 @@ const formSchema = z.object({
 
 const AddTask = () => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectOpen, setSelectOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [fileId, setFileId] = useState<number | undefined>();
+  const { groupMember, setGroupMember } = useGroups();
   useEffect(() => {
     if (fileId && !isUploading) {
       form.setValue('fileId', fileId);
     }
-  }, [fileId, isUploading]);
+    if (groupMember?.groupId) {
+      form.setValue('groupId', groupMember?.groupId);
+    }
+  }, [fileId, isUploading, groupMember]);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -79,11 +76,6 @@ const AddTask = () => {
       dueDate: undefined,
       createdAt: new Date(),
     },
-  });
-  const { data: groups } = api.group.getAll.useQuery(undefined, {
-    refetchOnWindowFocus: false,
-    enabled: modalOpen,
-    refetchOnReconnect: false,
   });
   const { toast } = useToast();
   const utils = api.useUtils();
@@ -101,8 +93,33 @@ const AddTask = () => {
         setFileId(undefined);
         setIsUploading(false);
       },
+      onError: (err) => {
+        if (err.data?.code === 'UNAUTHORIZED') {
+          toast({
+            title: 'Error',
+            description: 'Not a Moderator.',
+            variant: 'destructive',
+          });
+          setGroupMember(undefined);
+          return;
+        }
+        toast({
+          title: 'Error',
+          description: 'Failed to add task.',
+          variant: 'destructive',
+        });
+      },
     });
   function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!groupMember) {
+      toast({
+        title: 'Error',
+        description: 'Select a group to add a task.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    form.setValue('groupId', groupMember.groupId);
     addTask({ ...values });
   }
   return (
@@ -114,7 +131,7 @@ const AddTask = () => {
             variant='default'
             size={'lg'}
             disabled={taskAddStatus === 'loading' || isUploading}
-            className='m-4 rounded-sm'
+            className='rounded-sm'
           >
             {taskAddStatus === 'loading' || isUploading ? (
               <Loader2 className='mr-2 h-4 w-4 animate-spin' />
@@ -201,71 +218,6 @@ const AddTask = () => {
                     </PopoverContent>
                   </Popover>
                   <FormDescription>Due date of the task.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='groupId'
-              render={({ field }) => (
-                <FormItem className='flex flex-col'>
-                  <FormLabel>Group</FormLabel>
-                  <Popover open={selectOpen} onOpenChange={setSelectOpen}>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant='outline'
-                          role='combobox'
-                          className={cn(
-                            'w-[200px] justify-between',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                          disabled={!groups}
-                        >
-                          {groups && field.value
-                            ? groups.find((group) => group.id === field.value)
-                                ?.name
-                            : 'Select Group'}
-                          <ChevronsDownUp className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className='w-[200px] p-0'>
-                      <Command>
-                        <CommandInput
-                          placeholder='Search group...'
-                          className='h-9'
-                        />
-                        <CommandEmpty>No Group found.</CommandEmpty>
-                        <CommandGroup>
-                          {groups?.map((group) => (
-                            <CommandItem
-                              value={group.name}
-                              key={group.id}
-                              onSelect={() => {
-                                form.setValue('groupId', group.id);
-                                setSelectOpen(false);
-                              }}
-                            >
-                              {group.name}
-                              <CheckIcon
-                                className={cn(
-                                  'ml-auto h-4 w-4',
-                                  group.id === field.value
-                                    ? 'opacity-100'
-                                    : 'opacity-0',
-                                )}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  <FormDescription>
-                    The group to assign this task.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

@@ -22,9 +22,11 @@ const Layout = ({ children }: PropsWithChildren) => {
     );
   }
   return (
-    <MaxWidthWrapper>
-      <MenuBar>{children}</MenuBar>
-    </MaxWidthWrapper>
+    <div className='md:flex'>
+      <MaxWidthWrapper>
+        <MenuBar>{children}</MenuBar>
+      </MaxWidthWrapper>
+    </div>
   );
 };
 
