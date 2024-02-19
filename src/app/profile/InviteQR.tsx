@@ -126,7 +126,7 @@ const InviteQR: FC<Props> = ({ env }) => {
             </span>
           </div>
         </div>
-        <DialogFooter className='flex w-full justify-center gap-2 md:gap-5'>
+        <DialogFooter className='flex flex-row justify-center gap-2 md:gap-5'>
           <DialogClose asChild className=''>
             <Button
               type='submit'
