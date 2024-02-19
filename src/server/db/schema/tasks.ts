@@ -1,33 +1,37 @@
 import {
-  sqliteTable,
+  pgTable,
   integer,
   primaryKey,
   text,
-  int,
-} from 'drizzle-orm/sqlite-core';
+  timestamp,
+  varchar,
+  boolean,
+  pgEnum,
+  serial,
+} from 'drizzle-orm/pg-core';
 import { groups } from './groups';
 import { users } from './users';
 import { relations, sql } from 'drizzle-orm';
 import { files } from './files';
 
-export const tasks = sqliteTable('task', {
-  id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  title: text('title', { mode: 'text' }).notNull(),
-  description: text('description', { mode: 'text' }).notNull(),
-  dueDate: integer('dueDate', { mode: 'timestamp' }).notNull(),
+export const taskState = pgEnum('taskState', ['OPEN', 'DELETED', 'DONE']);
+
+export const tasks = pgTable('task', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  dueDate: timestamp('dueDate').notNull(),
   groupId: integer('groupId')
     .notNull()
     .references(() => groups.id),
-  createdAt: integer('createdAt', { mode: 'timestamp' })
+  createdAt: timestamp('createdAt')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  assignedById: text('assignedById', { length: 255, mode: 'text' })
+  assignedById: varchar('assignedById', { length: 255 })
     .notNull()
     .references(() => users.id),
   fileId: integer('fileId').references(() => files.id, { onDelete: 'cascade' }),
-  state: text('state', { enum: ['OPEN', 'DELETED', 'DONE'] })
-    .notNull()
-    .default('OPEN'),
+  state: taskState('state').notNull().default('OPEN'),
 });
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
@@ -40,22 +44,22 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   file: one(files, { fields: [tasks.fileId], references: [files.id] }),
 }));
 
-export const userTasks = sqliteTable(
+export const userTasks = pgTable(
   'userTask',
   {
-    userId: text('userId', { mode: 'text', length: 255 })
+    userId: varchar('userId', { length: 255 })
       .references(() => users.id)
       .notNull(),
-    taskId: integer('taskId', { mode: 'number' })
+    taskId: integer('taskId')
       .references(() => tasks.id)
       .notNull(),
     groupId: integer('groupId')
       .notNull()
       .references(() => groups.id),
-    completed: int('completed', { mode: 'boolean' }).notNull().default(false),
-    completedAt: integer('completedAt', { mode: 'timestamp' }),
-    cancelled: int('cancelled', { mode: 'boolean' }).notNull().default(false),
-    cancelledAt: int('cancelledAt', { mode: 'number' }),
+    completed: boolean('completed').notNull().default(false),
+    completedAt: timestamp('completedAt'),
+    cancelled: boolean('cancelled').notNull().default(false),
+    cancelledAt: integer('cancelledAt'),
   },
   (ut) => ({ pk: primaryKey({ columns: [ut.userId, ut.taskId] }) }),
 );

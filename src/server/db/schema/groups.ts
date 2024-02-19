@@ -1,45 +1,47 @@
 import {
-  integer,
-  sqliteTable,
+  pgTable,
   text,
-  int,
+  integer,
   primaryKey,
-} from 'drizzle-orm/sqlite-core';
+  varchar,
+  timestamp,
+  boolean,
+  pgEnum,
+  serial,
+} from 'drizzle-orm/pg-core';
 import { users } from './users';
 import { relations, sql } from 'drizzle-orm';
 
-export const groups = sqliteTable('group', {
-  id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  name: text('name', { mode: 'text' }).notNull().unique(),
-  description: text('description', { mode: 'text', length: 255 })
-    .notNull()
-    .default(''),
-  inviteCode: text('inviteCode', { mode: 'text', length: 255 }),
-  inviteCodeExpiry: int('inviteCodeExpiry', { mode: 'timestamp' }),
-  createdAt: int('createdAt', { mode: 'timestamp' }).default(
-    sql`CURRENT_TIMESTAMP`,
-  ),
+export const groups = pgTable('group', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull().unique(),
+  description: varchar('description', { length: 255 }).notNull().default(''),
+  inviteCode: varchar('inviteCode', { length: 255 }),
+  inviteCodeExpiry: timestamp('inviteCodeExpiry'),
+  createdAt: timestamp('createdAt').default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const groupsRelations = relations(groups, ({ many }) => ({
   members: many(groupMembers),
 }));
 
-export const groupMembers = sqliteTable(
+export const groupRole = pgEnum('groupRole', ['USER', 'MOD', 'ADMIN']);
+
+export const groupMembers = pgTable(
   'group_member',
   {
     groupId: integer('groupId')
       .notNull()
       .references(() => groups.id),
-    userId: text('userId', { length: 255 })
+    userId: varchar('userId', { length: 255 })
       .notNull()
       .references(() => users.id),
-    role: text('role', { enum: ['USER', 'MOD', 'ADMIN'] }).notNull(),
-    joinedAt: int('joinedAt', { mode: 'timestamp' })
+    role: groupRole('role').notNull().default('USER'),
+    joinedAt: timestamp('joinedAt')
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    leftAt: int('leftAt', { mode: 'timestamp' }),
-    joined: int('joined', { mode: 'boolean' }).notNull().default(false),
+    leftAt: timestamp('leftAt'),
+    joined: boolean('joined').notNull().default(false),
   },
   (gm) => ({ pk: primaryKey({ columns: [gm.groupId, gm.userId] }) }),
 );

@@ -15,7 +15,7 @@ export const getGrpModMember = db.query.groupMembers
         eq(gm.joined, true),
       ),
   })
-  .prepare();
+  .prepare('getGrpModMember');
 
 export const getGrpMember = db.query.groupMembers
   .findFirst({
@@ -28,4 +28,4 @@ export const getGrpMember = db.query.groupMembers
         eq(gm.joined, true),
       ),
   })
-  .prepare();
+  .prepare('getGrpMember');

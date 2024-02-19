@@ -1,5 +1,5 @@
-import { migrate } from 'drizzle-orm/libsql/migrator';
-import { client, db } from '@/server/db';
+import { migrate } from 'drizzle-orm/postgres-js/migrator';
+import { db } from '@/server/db';
 
 async function main() {
   console.log('Running migrations');
@@ -8,12 +8,8 @@ async function main() {
   process.exit(0);
 }
 
-main()
-  .catch((e) => {
-    console.error('Migration failed');
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => {
-    client.close();
-  });
+main().catch((e) => {
+  console.error('Migration failed');
+  console.error(e);
+  process.exit(1);
+});

@@ -1,9 +1,9 @@
 import { getServerAuthSession } from '@/server/auth';
 import Link from 'next/link';
 import React, { Fragment } from 'react';
-import { buttonVariants } from './ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { ModeToggle } from './ModeToggle';
-import { LogIn, LogOut, Settings } from 'lucide-react';
+import { LogInIcon, LogOutIcon, SettingsIcon } from 'lucide-react';
 import GroupSelect from './GroupSelect';
 import InviteQR from '@/app/profile/InviteQR';
 import { env } from '@/env';
@@ -17,26 +17,26 @@ const Navbar = async () => {
         <Link href='/'>
           <span className='mx-2 text-xl font-semibold md:mx-10'>stip.</span>
         </Link>
-        <GroupSelect />
+        {session && <GroupSelect />}
       </div>
       <OptionMenu
         title='Settings'
         className='flex items-center justify-end gap-3'
         size={'sm'}
       >
-        <InviteQR env={env.NODE_ENV} />
-        <ModeToggle />
         {session ? (
           <Fragment>
+            <InviteQR env={env.NODE_ENV} />
+            <ModeToggle />
             <Link className={buttonVariants()} href='/profile'>
               <div className='flex items-center gap-3'>
-                <Settings className='h-4 w-4' />
+                <SettingsIcon className='h-4 w-4' />
                 <span className=''>Settings</span>
               </div>
             </Link>
             <Link className={buttonVariants()} href='/auth/logout'>
               <div className='flex items-center gap-3'>
-                <LogOut className='h-4 w-4' />
+                <LogOutIcon className='h-4 w-4' />
                 <span className=''> Logout</span>
               </div>
             </Link>
@@ -44,7 +44,7 @@ const Navbar = async () => {
         ) : (
           <Link className={buttonVariants()} href='/auth/login'>
             <div className='flex items-center gap-3'>
-              <LogIn className='h-4 w-4' />
+              <LogInIcon className='h-4 w-4' />
               <span className=''> Login</span>
             </div>
           </Link>

@@ -1,33 +1,12 @@
 {
   "version": "5",
-  "dialect": "sqlite",
+  "dialect": "pg",
   "entries": [
     {
       "idx": 0,
       "version": "5",
-      "when": 1706998177422,
-      "tag": "0000_natural_manta",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1707214073361,
-      "tag": "0001_famous_swarm",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1707469197479,
-      "tag": "0002_pale_spyke",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1707511808298,
-      "tag": "0003_flippant_warbound",
+      "when": 1708369088169,
+      "tag": "0000_late_umar",
       "breakpoints": true
     }
   ]

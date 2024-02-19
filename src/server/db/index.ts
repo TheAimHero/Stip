@@ -1,5 +1,5 @@
-import { drizzle, type LibSQLDatabase } from 'drizzle-orm/libsql';
-import { createClient } from '@libsql/client';
+import { drizzle, type NeonHttpDatabase } from 'drizzle-orm/neon-http';
+import { neon } from '@neondatabase/serverless';
 import { env } from '@/env.js';
 import * as auth from './schema/auth';
 import * as tasks from './schema/tasks';
@@ -10,17 +10,14 @@ import * as files from './schema/files';
 
 const schema = { ...auth, ...tasks, ...todos, ...users, ...groups, ...files };
 
-const client = createClient({
-  url: env.DATABASE_URL,
-  authToken: env.DATABASE_AUTH_TOKEN,
-});
+const client = neon(env.DATABASE_URL);
 
 declare global {
   // eslint-disable-next-line no-var -- only var works here
-  var db: LibSQLDatabase<typeof schema> | undefined;
+  var db: NeonHttpDatabase<typeof schema> | undefined;
 }
 
-let db: LibSQLDatabase<typeof schema>;
+let db: NeonHttpDatabase<typeof schema>;
 
 if (env.NODE_ENV === 'production') {
   db = drizzle(client, { schema });

@@ -1,1 +1,0 @@
-ALTER TABLE file ADD `fileType` text DEFAULT 'pdf' NOT NULL;

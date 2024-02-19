@@ -1,23 +1,24 @@
 import { sql, relations } from 'drizzle-orm';
 import {
-  sqliteTable,
-  int,
-  text,
+  pgTable,
   integer,
+  text,
   unique,
-} from 'drizzle-orm/sqlite-core';
+  timestamp,
+  varchar,
+  boolean,
+  serial,
+} from 'drizzle-orm/pg-core';
 import { accounts } from './auth';
 import { groupMembers, groups } from './groups';
 
-export const users = sqliteTable('user', {
-  id: text('id', { length: 255 }).notNull().primaryKey(),
-  name: text('name', { mode: 'text', length: 255 }),
-  email: text('email', { mode: 'text', length: 255 }).notNull(),
-  emailVerified: int('emailVerified', {
-    mode: 'timestamp',
-  }).default(sql`CURRENT_TIMESTAMP`),
-  image: text('image', { mode: 'text', length: 255 }),
-  rollNo: int('rollNo'),
+export const users = pgTable('user', {
+  id: varchar('id', { length: 255 }).notNull().primaryKey(),
+  name: varchar('name', { length: 255 }),
+  email: varchar('email', { length: 255 }).notNull(),
+  emailVerified: timestamp('emailVerified').default(sql`CURRENT_TIMESTAMP`),
+  image: text('image'),
+  rollNo: integer('rollNo'),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -25,18 +26,18 @@ export const usersRelations = relations(users, ({ many }) => ({
   groups: many(groupMembers),
 }));
 
-export const attendance = sqliteTable(
+export const attendance = pgTable(
   'attendance',
   {
-    id: integer('id').primaryKey({ autoIncrement: true }),
-    userId: text('userId', { length: 255, mode: 'text' })
+    id: serial('id').primaryKey(),
+    userId: varchar('userId', { length: 255 })
       .references(() => users.id)
       .notNull(),
     groupId: integer('groupId')
       .notNull()
       .references(() => groups.id),
-    present: int('present', { mode: 'boolean' }).notNull().default(false),
-    createdAt: int('createdAt', { mode: 'timestamp' })
+    present: boolean('present').notNull().default(false),
+    createdAt: timestamp('createdAt')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },

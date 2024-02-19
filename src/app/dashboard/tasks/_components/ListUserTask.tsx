@@ -184,6 +184,7 @@ const ListUserTask: FC<ListUserTaskProps> = ({ filterBy, sortBy }) => {
     {
       staleTime: timeInterval,
       refetchInterval: timeInterval,
+      enabled: !!groupMember,
     },
   );
   const filterTasks =

@@ -45,8 +45,7 @@ export const groupRouter = createTRPCRouter({
           description: input.description,
           createdAt: new Date(),
         })
-        .returning()
-        .all();
+        .returning();
       if (!group?.[0]) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -105,8 +104,7 @@ export const groupRouter = createTRPCRouter({
           role: 'USER',
           joined: true,
         })
-        .returning()
-        .all();
+        .returning();
       const prevTasks = await db.query.tasks.findMany({
         where: (t, { eq }) => eq(t.groupId, input.groupId),
       });
@@ -162,8 +160,7 @@ export const groupRouter = createTRPCRouter({
             inviteCodeExpiry: new Date(new Date().getTime() + 1000 * 60 * 15),
           })
           .where(eq(groups.id, input))
-          .returning()
-          .all();
+          .returning();
         return groupArr[0];
       }
       return group;
