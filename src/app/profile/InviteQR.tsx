@@ -56,6 +56,17 @@ const InviteQR: FC<Props> = ({ env }) => {
   }, [open]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [copied, copy] = useCopyToClipboard();
+  const handleDownload = useCallback(async () => {
+    if (ref.current === null) {
+      return;
+    }
+    const dataUrl = await toJpeg(ref.current, { cacheBust: true });
+    if (!dataUrl) return;
+    const link = document.createElement('a');
+    link.download = `${group?.name}_inviteQR.png`;
+    link.href = dataUrl;
+    link.click();
+  }, [ref, group]);
   if (groupMember?.role !== 'MOD') return null;
   const baseURL =
     env === 'development'
@@ -76,17 +87,6 @@ const InviteQR: FC<Props> = ({ env }) => {
       description: 'Invite link copied to clipboard',
     });
   }
-  const handleDownload = useCallback(async () => {
-    if (ref.current === null) {
-      return;
-    }
-    const dataUrl = await toJpeg(ref.current, { cacheBust: true });
-    if (!dataUrl) return;
-    const link = document.createElement('a');
-    link.download = `${group?.name}_inviteQR.png`;
-    link.href = dataUrl;
-    link.click();
-  }, [ref, group]);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
