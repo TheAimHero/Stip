@@ -7,7 +7,6 @@ import { tasks, userTasks } from '@/server/db/schema/tasks';
 import { and, eq } from 'drizzle-orm';
 import { files } from '@/server/db/schema/files';
 import { getGrpMember, getGrpModMember } from '@/lib/db/preparedStatement';
-import { groupMembers } from '@/server/db/schema/groups';
 
 export const taskRouter = createTRPCRouter({
   getAllUserTask: protectedProcedure
