@@ -111,8 +111,8 @@ const InviteQR: FC<Props> = ({ env }) => {
           <span className=''>Invite QR</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className='w-[95%] max-w-[500px]'>
-        <div ref={ref} className='m-4 flex flex-col p-5'>
+      <DialogContent className='w-[95%]'>
+        <div ref={ref} className='flex w-[95%] flex-col'>
           <DialogHeader>
             <DialogTitle>Group Invite</DialogTitle>
             <DialogDescription>
@@ -145,13 +145,9 @@ const InviteQR: FC<Props> = ({ env }) => {
             </span>
           </div>
         </div>
-        <DialogFooter className='flex flex-row justify-center gap-2 md:gap-5'>
-          <DialogClose asChild className=''>
-            <Button
-              type='submit'
-              className='flex items-center gap-3'
-              size={'sm'}
-            >
+        <DialogFooter className='grid grid-cols-2 gap-2 md:flex md:flex-row md:gap-5'>
+          <DialogClose asChild>
+            <Button className='flex items-center gap-3' size={'sm'}>
               <XIcon className='h-4 w-4' />
               <span>Close</span>
             </Button>

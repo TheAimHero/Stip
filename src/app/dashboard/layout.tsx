@@ -5,14 +5,7 @@ import React, { type PropsWithChildren } from 'react';
 import { redirect } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import MenuBar from '@/components/MenuBar';
-import {
-  Loader2,
-  BookCheck,
-  CheckSquare,
-  Edit3,
-  Users,
-  RssIcon,
-} from 'lucide-react';
+import { Loader2, BookCheck, CheckSquare, Edit3, Users } from 'lucide-react';
 
 const pagesObj = [
   {
