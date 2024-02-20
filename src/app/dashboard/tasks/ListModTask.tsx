@@ -38,8 +38,9 @@ interface TaskCardProps {
 
 const TaskCard: FC<TaskCardProps> = ({
   description,
-  id,
+  id: taskId,
   title,
+  groupId,
   dueDate,
   fileId,
   createdAt,
@@ -81,9 +82,7 @@ const TaskCard: FC<TaskCardProps> = ({
             <span className='text-xs'>{duration}</span>
           </div>
           <Button
-            onClick={() => {
-              deleteTask(id);
-            }}
+            onClick={() => deleteTask({ groupId, taskId })}
             className='w-20 p-0'
             variant={'destructive'}
           >

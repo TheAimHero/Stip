@@ -2,11 +2,11 @@
 
 import React, { Fragment, useState } from 'react';
 import OptionMenu from '@/components/OptionMenu';
-import ListModTask from './_components/ListModTask';
-import ListUserTask from './_components/ListUserTask';
-import SortTasks from './_components/SortTasks';
-import FilterTasks from './_components/FilterTasks';
-import AddTask from './_components/AddTask';
+import ListModTask from './ListModTask';
+import ListUserTask from './ListUserTask';
+import SortTasks from './SortTasks';
+import FilterTasks from './FilterTasks';
+import AddTask from './AddTask';
 import { useGroups } from '@/components/Context';
 
 const Page = () => {
