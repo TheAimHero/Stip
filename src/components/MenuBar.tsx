@@ -1,20 +1,7 @@
 'use client';
 
-import React, {
-  Fragment,
-  type FC,
-  type PropsWithChildren,
-  useState,
-} from 'react';
-import {
-  ArrowRight,
-  BookCheck,
-  Check,
-  CheckSquare,
-  Edit3,
-  Menu,
-  Users,
-} from 'lucide-react';
+import React, { Fragment, type FC, useState, type ReactNode } from 'react';
+import { ArrowRight, Check, Menu } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -30,34 +17,19 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
-const pagesObj = [
-  {
-    link: '/dashboard/todos',
-    icon: <CheckSquare className='sr-only h-4 w-4 sm:not-sr-only' />,
-    name: 'Todos',
-    value: 'todos',
-  },
-  {
-    link: '/dashboard/tasks',
-    icon: <BookCheck className='sr-only h-4 w-4 sm:not-sr-only' />,
-    name: 'Tasks',
-    value: 'tasks',
-  },
-  {
-    link: '/dashboard/attendance',
-    icon: <Users className='sr-only h-4 w-4 sm:not-sr-only' />,
-    name: 'Attendance',
-    value: 'attendance',
-  },
-  {
-    link: '/dashboard/editor',
-    icon: <Edit3 className='sr-only h-4 w-4 sm:not-sr-only' />,
-    name: 'Editor',
-    value: 'editor',
-  },
-];
+type Option = {
+  link: string;
+  icon: ReactNode;
+  name: string;
+  value: string;
+};
 
-const MenuBar: FC<PropsWithChildren> = ({ children }) => {
+interface Props {
+  optionsArr: Option[];
+  children: ReactNode;
+}
+
+const MenuBar: FC<Props> = ({ children, optionsArr }) => {
   const defaultTab = usePathname().split('/').pop()!;
   const device = useMediaQuery('(min-width: 768px)');
   const [open, setOpen] = useState(false);
@@ -69,7 +41,7 @@ const MenuBar: FC<PropsWithChildren> = ({ children }) => {
           className='max-w-screen mx-auto my-4 w-[98%]'
         >
           <TabsList className='flex h-full w-full justify-evenly gap-5'>
-            {pagesObj.map(({ icon, link, name, value }) => {
+            {optionsArr.map(({ icon, link, name, value }) => {
               return (
                 <TabsTrigger
                   key={value}
@@ -104,13 +76,13 @@ const MenuBar: FC<PropsWithChildren> = ({ children }) => {
                 <span>Menu</span>
                 <ArrowRight className='h-4 w-4' />
                 <span>
-                  {pagesObj.find((page) => page.value === defaultTab)?.name}
+                  {optionsArr.find((page) => page.value === defaultTab)?.name}
                 </span>
               </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className='mx-auto mt-3 w-[70vw] p-3'>
-            {pagesObj.map(({ icon, link, name, value }) => {
+            {optionsArr.map(({ icon, link, name, value }) => {
               return (
                 <Fragment key={value}>
                   <Link

@@ -5,7 +5,41 @@ import React, { type PropsWithChildren } from 'react';
 import { redirect } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import MenuBar from '@/components/MenuBar';
-import { Loader2 } from 'lucide-react';
+import {
+  Loader2,
+  BookCheck,
+  CheckSquare,
+  Edit3,
+  Users,
+  RssIcon,
+} from 'lucide-react';
+
+const pagesObj = [
+  {
+    link: '/dashboard/todos',
+    icon: <CheckSquare className='sr-only h-4 w-4 sm:not-sr-only' />,
+    name: 'Todos',
+    value: 'todos',
+  },
+  {
+    link: '/dashboard/tasks',
+    icon: <BookCheck className='sr-only h-4 w-4 sm:not-sr-only' />,
+    name: 'Tasks',
+    value: 'tasks',
+  },
+  {
+    link: '/dashboard/attendance',
+    icon: <Users className='sr-only h-4 w-4 sm:not-sr-only' />,
+    name: 'Attendance',
+    value: 'attendance',
+  },
+  {
+    link: '/dashboard/editor',
+    icon: <Edit3 className='sr-only h-4 w-4 sm:not-sr-only' />,
+    name: 'Editor',
+    value: 'editor',
+  },
+];
 
 const Layout = ({ children }: PropsWithChildren) => {
   const { status: authStatus } = useSession();
@@ -24,7 +58,7 @@ const Layout = ({ children }: PropsWithChildren) => {
   return (
     <div className='md:flex'>
       <MaxWidthWrapper>
-        <MenuBar>{children}</MenuBar>
+        <MenuBar optionsArr={pagesObj}>{children}</MenuBar>
       </MaxWidthWrapper>
     </div>
   );
