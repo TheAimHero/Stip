@@ -24,11 +24,19 @@ import React, {
 } from 'react';
 import QRCode from 'react-qr-code';
 import { api } from '@/trpc/react';
-import { CopyIcon, DownloadIcon, QrCodeIcon, XIcon } from 'lucide-react';
+import {
+  CopyIcon,
+  DownloadIcon,
+  QrCodeIcon,
+  RefreshCw,
+  XIcon,
+} from 'lucide-react';
 import { useCopyToClipboard } from '@uidotdev/usehooks';
 import { useToast } from '@/components/ui/use-toast';
 import { toJpeg } from 'html-to-image';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Props {
   env: typeof env.NODE_ENV;
@@ -37,17 +45,21 @@ interface Props {
 const InviteQR: FC<Props> = ({ env }) => {
   const { groupMember } = useGroups();
   const [open, setOpen] = useState(false);
+  const [refresh, setRefresh] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const {
     data: group,
     status: groupStatus,
     refetch,
-  } = api.group.getGroupInvite.useQuery(groupMember?.groupId ?? 0, {
-    refetchOnWindowFocus: false,
-    cacheTime: 0,
-    staleTime: 0,
-    enabled: !!groupMember?.groupId && groupMember?.role === 'MOD',
-  });
+  } = api.group.getGroupInvite.useQuery(
+    { groupId: groupMember?.groupId ?? 0, refresh },
+    {
+      refetchOnWindowFocus: false,
+      cacheTime: 0,
+      staleTime: 0,
+      enabled: !!groupMember?.groupId && groupMember?.role === 'MOD',
+    },
+  );
   const { toast } = useToast();
   useEffect(() => {
     if (open) {
@@ -109,7 +121,11 @@ const InviteQR: FC<Props> = ({ env }) => {
           </DialogHeader>
           <div className='flex flex-col items-center gap-4'>
             <Label htmlFor='name' className='mt-5 text-right'>
-              {group ? `Invite to ${group.name}` : 'Loading...'}
+              {group ? (
+                <span className='h-5'>{`Invite to ${group?.name}`}</span>
+              ) : (
+                <Skeleton className='h-5 w-[20ch] animate-pulse' />
+              )}
             </Label>
             <div className='rounded-lg border border-dashed border-black p-5 dark:border-white'>
               <div className='rounded-lg bg-black dark:bg-white'>
@@ -121,8 +137,11 @@ const InviteQR: FC<Props> = ({ env }) => {
               </div>
             </div>
             <span>
-              {group?.inviteCodeExpiry &&
-                `Valid until ${format(group.inviteCodeExpiry, 'dd MMM yyyy hh:mm')}`}
+              {group?.inviteCodeExpiry ? (
+                <span className='h-5'>{`Valid until ${format(group?.inviteCodeExpiry, 'dd MMM yyyy hh:mm')}`}</span>
+              ) : (
+                <Skeleton className='h-5 w-[20ch] animate-pulse'> </Skeleton>
+              )}
             </span>
           </div>
         </div>
@@ -156,6 +175,22 @@ const InviteQR: FC<Props> = ({ env }) => {
           >
             <DownloadIcon className='h-4 w-4' />
             <span>Download QR</span>
+          </Button>
+          <Button
+            className='flex items-center gap-3'
+            size={'sm'}
+            onClick={async () => {
+              setRefresh(true);
+              await refetch();
+              setRefresh(false);
+            }}
+            disabled={groupStatus !== 'success' || !group}
+          >
+            <RefreshCw
+              className={cn('h-4 w-4', {
+                'animate-spin': groupStatus === 'loading' && refresh,
+              })}
+            />
           </Button>
         </DialogFooter>
       </DialogContent>

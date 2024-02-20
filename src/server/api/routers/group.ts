@@ -84,7 +84,6 @@ export const groupRouter = createTRPCRouter({
         });
       }
       if (group.inviteCode !== input.inviteCode) {
-        console.log(group.inviteCode, input.inviteCode);
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'Invalid invite code',
@@ -124,11 +123,17 @@ export const groupRouter = createTRPCRouter({
     }),
 
   getGroupInvite: protectedProcedure
-    .input(z.number())
+    .input(
+      z.object({
+        groupId: z.number(),
+        refresh: z.boolean().optional().default(false),
+      }),
+    )
     .query(async ({ input, ctx }) => {
+      const { groupId, refresh } = input;
       const user = await db.query.groupMembers.findFirst({
         where: (gm, { eq, and }) =>
-          and(eq(gm.userId, ctx.session.user.id), eq(gm.groupId, input)),
+          and(eq(gm.userId, ctx.session.user.id), eq(gm.groupId, groupId)),
       });
       if (!user) {
         throw new TRPCError({
@@ -143,7 +148,7 @@ export const groupRouter = createTRPCRouter({
         });
       }
       const group = await db.query.groups.findFirst({
-        where: (g, { eq }) => eq(g.id, input),
+        where: (g, { eq }) => eq(g.id, groupId),
       });
       if (!group) {
         throw new TRPCError({
@@ -152,14 +157,19 @@ export const groupRouter = createTRPCRouter({
         });
       }
       const { inviteCode, inviteCodeExpiry } = group;
-      if (!inviteCode || !inviteCodeExpiry || inviteCodeExpiry < new Date()) {
+      if (
+        !inviteCode ||
+        !inviteCodeExpiry ||
+        inviteCodeExpiry < new Date() ||
+        refresh
+      ) {
         const groupArr = await db
           .update(groups)
           .set({
             inviteCode: randomUUID(),
             inviteCodeExpiry: new Date(new Date().getTime() + 1000 * 60 * 15),
           })
-          .where(eq(groups.id, input))
+          .where(eq(groups.id, input.groupId))
           .returning();
         return groupArr[0];
       }
