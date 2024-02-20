@@ -5,7 +5,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { ModeToggle } from './ModeToggle';
 import { LogInIcon, LogOutIcon, SettingsIcon } from 'lucide-react';
 import GroupSelect from './GroupSelect';
-import InviteQR from '@/app/profile/InviteQR';
+import InviteQR from '@/components/InviteQR';
 import { env } from '@/env';
 import OptionMenu from './OptionMenu';
 
@@ -28,7 +28,7 @@ const Navbar = async () => {
           <Fragment>
             <InviteQR env={env.NODE_ENV} />
             <ModeToggle />
-            <Link className={buttonVariants()} href='/profile'>
+            <Link className={buttonVariants()} href='/settings'>
               <div className='flex items-center gap-3'>
                 <SettingsIcon className='h-4 w-4' />
                 <span className=''>Settings</span>

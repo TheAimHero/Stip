@@ -1,10 +1,11 @@
+import { getGrpModMember } from '@/lib/db/preparedStatement';
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { db } from '@/server/db';
 import { groupMembers, groups } from '@/server/db/schema/groups';
 import { userTasks } from '@/server/db/schema/tasks';
 import { TRPCError } from '@trpc/server';
 import { randomUUID } from 'crypto';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const groupRouter = createTRPCRouter({
@@ -59,6 +60,59 @@ export const groupRouter = createTRPCRouter({
         joined: true,
       });
       return group[0];
+    }),
+
+  deleteGroup: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ input, ctx }) => {
+      const grpModMember = await getGrpModMember.execute({
+        groupId: input,
+        userId: ctx.session.user.id,
+      });
+      if (!grpModMember) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User not found or not authorized',
+        });
+      }
+      const groupArr = await db
+        .delete(groups)
+        .where(eq(groups.id, input))
+        .returning();
+      const group = groupArr[0];
+      if (!group) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Group not deleted',
+        });
+      }
+      return group;
+    }),
+
+  removeMember: protectedProcedure
+    .input(
+      z.object({
+        groupId: z.number(),
+        userIds: z.string().array().nonempty(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { userIds, groupId } = input;
+      const isMod = await getGrpModMember.execute({
+        groupId,
+        userId: ctx.session.user.id,
+      });
+      if (!isMod) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User not authorized',
+        });
+      }
+      const deleteGrpMembers = await db
+        .delete(groupMembers)
+        .where(inArray(groupMembers.userId, userIds))
+        .returning({ userId: groupMembers.userId });
+      return deleteGrpMembers;
     }),
 
   joinGroup: protectedProcedure
@@ -176,6 +230,7 @@ export const groupRouter = createTRPCRouter({
       return group;
     }),
 
+  // @fix: check if member and don't return inviteCode and inviteExp
   getGroup: protectedProcedure.input(z.number()).query(async ({ input }) => {
     return db.query.groups.findFirst({
       where: (g, { eq }) => eq(g.id, input),

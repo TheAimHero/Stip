@@ -23,7 +23,7 @@ export const tasks = pgTable('task', {
   dueDate: timestamp('dueDate').notNull(),
   groupId: integer('groupId')
     .notNull()
-    .references(() => groups.id),
+    .references(() => groups.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   createdAt: timestamp('createdAt')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -55,7 +55,10 @@ export const userTasks = pgTable(
       .notNull(),
     groupId: integer('groupId')
       .notNull()
-      .references(() => groups.id),
+      .references(() => groups.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
     completed: boolean('completed').notNull().default(false),
     completedAt: timestamp('completedAt'),
     cancelled: boolean('cancelled').notNull().default(false),

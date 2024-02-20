@@ -3,10 +3,10 @@
 - Share option for group invite
 - Share option for files
 - Share option for tasks
+- Link already uploaded files for new tasks
 
 # Improvements
 
-- Use Conditional routing using role for task
 - Different user and group settings
 
 # Known issues

@@ -32,10 +32,13 @@ export const groupMembers = pgTable(
   {
     groupId: integer('groupId')
       .notNull()
-      .references(() => groups.id),
+      .references(() => groups.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
     userId: varchar('userId', { length: 255 })
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     role: groupRole('role').notNull().default('USER'),
     joinedAt: timestamp('joinedAt')
       .default(sql`CURRENT_TIMESTAMP`)

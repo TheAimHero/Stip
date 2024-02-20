@@ -4,10 +4,10 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper';
 import React, { type PropsWithChildren } from 'react';
 import { redirect } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import MenuBar from '@/components/MenuBar';
+import MenuBar, { type MenuBarOptions } from '@/components/MenuBar';
 import { Loader2, BookCheck, CheckSquare, Edit3, Users } from 'lucide-react';
 
-const pagesObj = [
+const pagesObj: MenuBarOptions[] = [
   {
     link: '/dashboard/todos',
     icon: <CheckSquare className='sr-only h-4 w-4 sm:not-sr-only' />,

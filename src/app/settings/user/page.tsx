@@ -42,18 +42,7 @@ const Page = async () => {
           </Card>
           <UserForm />
         </div>
-        <div className='flex flex-col gap-5'>
-          <Card className='w-full'>
-            <CardHeader>
-              <CardTitle className='mx-auto text-xl underline'>
-                Add Group
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <GroupForm />
-            </CardContent>
-          </Card>
-        </div>
+        <div className='flex flex-col gap-5'></div>
       </div>
       <div className='mx-auto max-w-[300px]'>
         <Link

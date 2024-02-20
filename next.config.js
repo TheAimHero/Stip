@@ -3,9 +3,9 @@
  * for Docker builds.
  */
 await import('./src/env.js');
-import removeImports from 'next-remove-imports'
+import removeImports from 'next-remove-imports';
 
-const remImports = removeImports()
+const remImports = removeImports();
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -13,6 +13,11 @@ const config = {
     {
       source: '/dashboard',
       destination: '/dashboard/todos',
+      permanent: true,
+    },
+    {
+      source: '/settings',
+      destination: '/settings/user',
       permanent: true,
     },
   ],

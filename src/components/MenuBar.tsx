@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
-type Option = {
+export type MenuBarOptions = {
   link: string;
   icon: ReactNode;
   name: string;
@@ -25,11 +25,12 @@ type Option = {
 };
 
 interface Props {
-  optionsArr: Option[];
+  optionsArr: MenuBarOptions[];
+  title?: string;
   children: ReactNode;
 }
 
-const MenuBar: FC<Props> = ({ children, optionsArr }) => {
+const MenuBar: FC<Props> = ({ children, optionsArr, title = 'Menu' }) => {
   const defaultTab = usePathname().split('/').pop()!;
   const device = useMediaQuery('(min-width: 768px)');
   const [open, setOpen] = useState(false);
@@ -49,7 +50,7 @@ const MenuBar: FC<Props> = ({ children, optionsArr }) => {
                   asChild
                   className='flex-1'
                 >
-                  <Link href={link} className='flex items-center gap-1'>
+                  <Link href={link} className='flex items-center gap-3'>
                     {icon}
                     <span className='truncate'>{name}</span>
                   </Link>
@@ -73,7 +74,7 @@ const MenuBar: FC<Props> = ({ children, optionsArr }) => {
             >
               <div className='flex flex-row items-center gap-3'>
                 <Menu className='h-4 w-4' />
-                <span>Menu</span>
+                <span>{title}</span>
                 <ArrowRight className='h-4 w-4' />
                 <span>
                   {optionsArr.find((page) => page.value === defaultTab)?.name}
