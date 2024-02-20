@@ -1,102 +1,14 @@
 'use client';
 
-import { formatDateTime } from '@/lib/utils';
 import { api } from '@/trpc/react';
-import { format } from 'date-fns';
-import { Loader2, Trash2, Ghost } from 'lucide-react';
-import { type FC, useState, useEffect, Fragment } from 'react';
-import { Button } from '@/components/ui/button';
+import { Ghost } from 'lucide-react';
+import { type FC, Fragment } from 'react';
 import { useGroups } from '@/components/Context';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-  CardFooter,
-} from '@/components/ui/card';
 import SortTasksClass, {
   type SortParam,
   type SortTasksMethod,
 } from '@/lib/tasks/sortTasks';
-import DownloadButton from './DownloadButton';
-
-interface TaskCardProps {
-  group: {
-    id: number;
-    name: string;
-  };
-  id: number;
-  title: string;
-  description: string;
-  dueDate: Date;
-  groupId: number;
-  createdAt: Date;
-  fileId: number | undefined;
-  assignedById: string;
-}
-
-const TaskCard: FC<TaskCardProps> = ({
-  description,
-  id: taskId,
-  title,
-  groupId,
-  dueDate,
-  fileId,
-  createdAt,
-}) => {
-  const [duration, setDuration] = useState('');
-  const utils = api.useUtils();
-  const { mutate: deleteTask, status: deleteStatus } =
-    api.task.deleteMod.useMutation({
-      onSuccess: async () => await utils.task.getAllModTask.invalidate(),
-    });
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDuration(formatDateTime(dueDate));
-    }, 60000);
-    setDuration(formatDateTime(dueDate));
-    return () => clearInterval(interval);
-  }, [dueDate]);
-  return (
-    <Card>
-      <CardHeader className='flex flex-row items-center justify-between gap-3 md:gap-10'>
-        <CardTitle className='truncate text-xl'>{title}</CardTitle>
-        {fileId && <DownloadButton fileId={fileId} />}
-      </CardHeader>
-      <CardContent className='flex flex-col gap-3'>
-        <CardDescription className='truncate'>{description}</CardDescription>
-        <div className='flex w-full items-center justify-between gap-5'>
-          <span>Due Date: </span>
-          <span>{format(dueDate, 'dd MMM yyyy')}</span>
-        </div>
-        <div className='flex w-full items-center justify-between gap-5'>
-          <span>Created Date: </span>
-          <span>{format(createdAt, 'dd MMM yyyy')}</span>
-        </div>
-      </CardContent>
-      <CardFooter>
-        <div className='flex w-full items-center justify-between gap-5'>
-          <div className='flex w-full flex-col'>
-            <span className='text-md'>Time Left: </span>
-            <span className='text-xs'>{duration}</span>
-          </div>
-          <Button
-            onClick={() => deleteTask({ groupId, taskId })}
-            className='w-20 p-0'
-            variant={'destructive'}
-          >
-            {deleteStatus === 'loading' ? (
-              <Loader2 className='h-4 w-6 animate-spin' />
-            ) : (
-              <Trash2 className='h-4 w-8' />
-            )}
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
-  );
-};
+import ModTaskCard, { type ModTaskCardProps } from './ModTaskCard';
 
 interface ListModTaskProps {
   sortBy: string;
@@ -117,7 +29,7 @@ const ListModTask: FC<ListModTaskProps> = ({ sortBy }) => {
     tasks &&
     (new SortTasksClass(tasks)[sortTaskMethod as SortTasksMethod](
       sortTaskParam as SortParam,
-    ) as TaskCardProps[]);
+    ) as ModTaskCardProps[]);
   return (
     <div className='m-4 mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 p-4 lg:grid-cols-2'>
       <Fragment>
@@ -130,7 +42,7 @@ const ListModTask: FC<ListModTaskProps> = ({ sortBy }) => {
           </div>
         ) : null}
         {sortedTasks
-          ? sortedTasks?.map((task) => <TaskCard key={task.id} {...task} />)
+          ? sortedTasks?.map((task) => <ModTaskCard key={task.id} {...task} />)
           : null}
       </Fragment>
     </div>
