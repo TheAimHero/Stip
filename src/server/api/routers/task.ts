@@ -7,6 +7,7 @@ import { tasks, userTasks } from '@/server/db/schema/tasks';
 import { and, eq } from 'drizzle-orm';
 import { files } from '@/server/db/schema/files';
 import { getGrpMember, getGrpModMember } from '@/lib/db/preparedStatement';
+import { groupMembers } from '@/server/db/schema/groups';
 
 export const taskRouter = createTRPCRouter({
   getAllUserTask: protectedProcedure
@@ -151,14 +152,15 @@ export const taskRouter = createTRPCRouter({
     }),
 
   deleteMod: protectedProcedure
-    .input(z.number())
+    .input(z.object({ taskId: z.number(), groupId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const assignedById = ctx.session?.user.id;
+      const { taskId, groupId } = input;
       if (!assignedById) {
         throw new TRPCError({ code: 'BAD_REQUEST', message: 'User not found' });
       }
       const grpModMember = await getGrpModMember.execute({
-        groupId: input,
+        groupId,
         userId: assignedById,
       });
       if (!grpModMember) {
@@ -170,7 +172,7 @@ export const taskRouter = createTRPCRouter({
       const taskArr = await db
         .update(tasks)
         .set({ state: 'DELETED' })
-        .where(and(eq(tasks.assignedById, assignedById), eq(tasks.id, input)))
+        .where(and(eq(tasks.assignedById, assignedById), eq(tasks.id, taskId)))
         .returning();
       const task = taskArr[0];
       if (!task) {
