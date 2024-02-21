@@ -16,7 +16,9 @@ const Page = () => {
   return (
     <Fragment>
       <div className='m-4 mr-0 flex items-center justify-between gap-2 md:gap-5'>
-        {groupMember?.role === 'MOD' && <AddTask />}
+        {(groupMember?.role === 'MOD' || groupMember?.role === 'ADMIN') && (
+          <AddTask />
+        )}
         <OptionMenu className=''>
           <div className='flex items-center justify-between gap-3 text-sm'>
             <span>Sort By:</span>
@@ -33,7 +35,9 @@ const Page = () => {
           )}
         </OptionMenu>
       </div>
-      {groupMember?.role === 'MOD' && <ListModTask sortBy={sortTaskBy} />}
+      {(groupMember?.role === 'MOD' || groupMember?.role === 'ADMIN') && (
+        <ListModTask sortBy={sortTaskBy} />
+      )}
       {groupMember?.role === 'USER' && (
         <ListUserTask sortBy={sortTaskBy} filterBy={filterTaskBy} />
       )}

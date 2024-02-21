@@ -15,6 +15,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { formatDateTime } from '@/lib/utils';
+import { useToast } from '@/components/ui/use-toast';
 
 export interface ModTaskCardProps {
   group: {
@@ -42,9 +43,30 @@ const ModTaskCard: FC<ModTaskCardProps> = ({
 }) => {
   const [duration, setDuration] = useState('');
   const utils = api.useUtils();
+  const { toast } = useToast();
   const { mutate: deleteTask, status: deleteStatus } =
     api.task.deleteMod.useMutation({
       onSuccess: async () => await utils.task.getAllModTask.invalidate(),
+      // @perf: remove code duplication
+      onError: async (err) => {
+        if (err.data?.code === 'UNAUTHORIZED') {
+          toast({
+            variant: 'destructive',
+            title: 'Task Deletion Failed',
+            description: 'User not found or not authorized',
+          });
+          return;
+        }
+        if (err.data?.code === 'NOT_FOUND') {
+          toast({
+            variant: 'destructive',
+            title: 'Task Deletion Failed',
+            description: 'Task not found. Try again...',
+          });
+          await utils.task.getAllModTask.invalidate();
+          return;
+        }
+      },
     });
   useEffect(() => {
     const interval = setInterval(() => {

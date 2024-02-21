@@ -36,7 +36,7 @@ export default function Page() {
           date={checked ? undefined : selectedDate}
         />
       )}
-      {groupMember?.role === 'MOD' && (
+      {(groupMember?.role === 'MOD' || groupMember?.role === 'ADMIN') && (
         <ModTab
           selectedDate={selectedDate}
           selectedGroup={groupMember.groupId}

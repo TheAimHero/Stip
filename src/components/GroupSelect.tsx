@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ChevronsDownUp, CheckIcon, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -27,10 +27,10 @@ const GroupSelect = () => {
   );
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<number | undefined>(groupMember?.groupId);
-  function displayValue() {
+  const displayValue = useCallback(() => {
     const currentGroup = groups?.find((group) => group.groupId === value);
     if (groups?.length === 0) return <span>No Groups</span>;
-    return currentGroup ? (
+    return currentGroup && groupMember ? (
       <div className='flex w-full max-w-[100px] items-center gap-1 md:max-w-[200px] md:justify-evenly md:gap-0'>
         <span className='font-medium md:text-lg'>
           {currentGroup.group.name}
@@ -43,7 +43,11 @@ const GroupSelect = () => {
         Select Group
       </span>
     );
-  }
+  }, [groupMember, groups]);
+  useEffect(() => {
+    if (groupMember?.groupId && groups) {
+    }
+  });
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>

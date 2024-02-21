@@ -14,7 +14,7 @@ interface ModTabProps {
 const ModTab: FC<ModTabProps> = ({ selectedGroup, selectedDate }) => {
   const { toast } = useToast();
   const utils = api.useUtils();
-  const { data: users } = api.user.getByGroup.useQuery(selectedGroup, {
+  const { data: users } = api.group.getGroupMembers.useQuery(selectedGroup, {
     cacheTime: 60 * 1000,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
@@ -67,12 +67,11 @@ const ModTab: FC<ModTabProps> = ({ selectedGroup, selectedDate }) => {
     });
   function handleSubmit() {
     if (selectedGroup && selectedDate && users && rowSelection) {
-      // @fix: make sure react table returns selected and unselected users
       // @hack: modify to include all users
       const userIds = rowSelection;
       users.forEach((user) => {
-        if (!userIds[user.id]) {
-          userIds[user.id] = false;
+        if (!userIds[user.userId]) {
+          userIds[user.userId] = false;
         }
       });
       setAttendance({
@@ -104,7 +103,13 @@ const ModTab: FC<ModTabProps> = ({ selectedGroup, selectedDate }) => {
       <DataTable
         rowSelection={rowSelection}
         setRowSelection={setRowSelection}
-        data={users}
+        data={users.map((member) => ({
+          email: member.user.email,
+          id: member.user.id,
+          name: member.user.name,
+          role: member.role,
+          rollNo: member.user.rollNo,
+        }))}
         prevAttendance={prevAttendance}
       />
       <Button

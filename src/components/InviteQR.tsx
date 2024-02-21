@@ -43,7 +43,7 @@ interface Props {
 }
 
 const InviteQR: FC<Props> = ({ env }) => {
-  const { groupMember } = useGroups();
+  const { groupMember, setGroupMember } = useGroups();
   const [open, setOpen] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -51,13 +51,14 @@ const InviteQR: FC<Props> = ({ env }) => {
     data: group,
     status: groupStatus,
     refetch,
+    error,
   } = api.group.getGroupInvite.useQuery(
     { groupId: groupMember?.groupId ?? 0, refresh },
     {
       refetchOnWindowFocus: false,
       cacheTime: 0,
       staleTime: 0,
-      enabled: !!groupMember?.groupId && groupMember?.role === 'MOD',
+      enabled: !!groupMember?.groupId && groupMember?.role !== 'USER',
     },
   );
   const { toast } = useToast();
@@ -66,6 +67,40 @@ const InviteQR: FC<Props> = ({ env }) => {
       void refetch();
     }
   }, [open]);
+  useEffect(() => {
+    if (error) {
+      if (error.data?.code === 'UNAUTHORIZED') {
+        toast({
+          title: 'Invite Fetch failed',
+          description: 'User not found or not authorized',
+          variant: 'destructive',
+        });
+        return;
+      }
+      if (error.data?.code === 'NOT_FOUND') {
+        toast({
+          title: 'Invite Fetch failed',
+          description: 'Group not found',
+          variant: 'destructive',
+        });
+        setGroupMember(undefined);
+        return;
+      }
+      if (error.data?.zodError) {
+        toast({
+          title: 'Invite Fetch failed',
+          description: 'Incorrect values. Try again...',
+          variant: 'destructive',
+        });
+        return;
+      }
+      toast({
+        title: 'Invite Fetch failed',
+        description: 'Something went wrong',
+        variant: 'destructive',
+      });
+    }
+  }, [error]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [copied, copy] = useCopyToClipboard();
   const handleDownload = useCallback(async () => {
@@ -79,7 +114,7 @@ const InviteQR: FC<Props> = ({ env }) => {
     link.href = dataUrl;
     link.click();
   }, [ref, group]);
-  if (groupMember?.role !== 'MOD') return null;
+  if (groupMember?.role === 'USER') return null;
   const baseURL =
     env === 'development'
       ? 'http://localhost:3000'
