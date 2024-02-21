@@ -1,15 +1,13 @@
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod';
 
-// @todo: Add refine string for google, and uploadthing
-
 export const env = createEnv({
   server: {
     DATABASE_URL: z
       .string()
       .url()
       .refine(
-        (str) => !str.includes('YOUR_MYSQL_URL_HERE'),
+        (str) => !str.includes('Your Mysql Url Here'),
         'You forgot to change the default URL',
       ),
     NODE_ENV: z
@@ -23,19 +21,29 @@ export const env = createEnv({
       (str) => process.env.VERCEL_URL ?? str,
       process.env.VERCEL ? z.string() : z.string().url(),
     ),
-    GOOGLE_CLIENT_ID: z.string(),
-    GOOGLE_CLIENT_SECRET: z.string(),
+    GOOGLE_CLIENT_ID: z
+      .string()
+      .refine(
+        (str) => !str.includes('Your Google Client ID Here'),
+        'You forgot to change the default',
+      ),
+    GOOGLE_CLIENT_SECRET: z
+      .string()
+      .refine(
+        (str) => !str.includes('Your Google Client Secret Here'),
+        'You forgot to change the default URL',
+      ),
     UPLOADTHING_SECRET: z
       .string()
       .refine(
-        (str) => !str.includes('YOUR_MYSQL_URL_HERE'),
-        'You forgot to change the default URL',
+        (str) => !str.includes('Your Upload Thing Secret Here'),
+        'You forgot to change the default',
       ),
     UPLOADTHING_APP_ID: z
       .string()
       .refine(
-        (str) => !str.includes('YOUR_MYSQL_URL_HERE'),
-        'You forgot to change the default URL',
+        (str) => !str.includes('Your Upload Thing App Id Here'),
+        'You forgot to change the default',
       ),
   },
 
