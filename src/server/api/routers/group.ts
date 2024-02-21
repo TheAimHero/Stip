@@ -5,7 +5,7 @@ import { groupMembers, groups } from '@/server/db/schema/groups';
 import { userTasks } from '@/server/db/schema/tasks';
 import { TRPCError } from '@trpc/server';
 import { randomUUID } from 'crypto';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, not, and, or } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const groupRouter = createTRPCRouter({
@@ -24,7 +24,10 @@ export const groupRouter = createTRPCRouter({
   getMod: protectedProcedure.query(async ({ ctx }) => {
     return db.query.groupMembers.findMany({
       where: (gm, { eq, and }) =>
-        and(eq(gm.userId, ctx.session.user.id), eq(gm.role, 'MOD')),
+        and(
+          eq(gm.userId, ctx.session.user.id),
+          or(eq(gm.role, 'MOD'), eq(gm.role, 'ADMIN')),
+        ),
       with: {
         group: { columns: { inviteCode: false, inviteCodeExpiry: false } },
       },
@@ -56,7 +59,7 @@ export const groupRouter = createTRPCRouter({
       await db.insert(groupMembers).values({
         userId: ctx.session.user.id,
         groupId: group[0].id,
-        role: 'MOD',
+        role: 'ADMIN',
         joined: true,
       });
       return group[0];
@@ -69,7 +72,7 @@ export const groupRouter = createTRPCRouter({
         groupId: input,
         userId: ctx.session.user.id,
       });
-      if (!grpModMember) {
+      if (!grpModMember || grpModMember.role !== 'ADMIN') {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'User not found or not authorized',
@@ -93,7 +96,7 @@ export const groupRouter = createTRPCRouter({
     .input(
       z.object({
         groupId: z.number(),
-        userIds: z.string().array().nonempty(),
+        userIds: z.string().array().min(1),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -110,7 +113,12 @@ export const groupRouter = createTRPCRouter({
       }
       const deleteGrpMembers = await db
         .delete(groupMembers)
-        .where(inArray(groupMembers.userId, userIds))
+        .where(
+          and(
+            inArray(groupMembers.userId, userIds),
+            not(eq(groupMembers.role, 'ADMIN')),
+          ),
+        )
         .returning({ userId: groupMembers.userId });
       return deleteGrpMembers;
     }),
@@ -195,7 +203,7 @@ export const groupRouter = createTRPCRouter({
           message: 'User not found',
         });
       }
-      if (user.role !== 'MOD') {
+      if (user.role === 'USER') {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'User not authorized',
@@ -230,10 +238,40 @@ export const groupRouter = createTRPCRouter({
       return group;
     }),
 
-  // @fix: check if member and don't return inviteCode and inviteExp
-  getGroup: protectedProcedure.input(z.number()).query(async ({ input }) => {
-    return db.query.groups.findFirst({
-      where: (g, { eq }) => eq(g.id, input),
-    });
-  }),
+  getGroup: protectedProcedure
+    .input(z.number())
+    .query(async ({ input, ctx }) => {
+      const isMember = await db.query.groupMembers.findFirst({
+        where: (gm, { eq, and }) =>
+          and(
+            eq(gm.groupId, input),
+            eq(gm.joined, true),
+            eq(gm.userId, ctx.session.user.id),
+          ),
+      });
+      if (!isMember) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User not found or not authorized',
+        });
+      }
+      const group = await db.query.groups.findFirst({
+        where: (g, { eq }) => eq(g.id, input),
+        columns: {
+          id: true,
+          name: true,
+          inviteCode: false,
+          createdAt: true,
+          description: true,
+          inviteCodeExpiry: false,
+        },
+      });
+      if (!group) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Group not found',
+        });
+      }
+      return group;
+    }),
 });

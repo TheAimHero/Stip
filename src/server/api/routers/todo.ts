@@ -3,23 +3,24 @@ import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { db } from '@/server/db';
 import { todos } from '@/server/db/schema/todos';
 import { and, eq } from 'drizzle-orm';
+import { TRPCError } from '@trpc/server';
 
 export const todoRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(({ ctx }) => {
-    return db
-      .select()
-      .from(todos)
-      .where(eq(todos.createdById, ctx.session.user.id));
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    const todos = await db.query.todos.findMany({
+      where: (t, { eq }) => eq(t.createdById, ctx.session.user.id),
+    });
+    if (!todos) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+    return todos;
   }),
 
   getOne: protectedProcedure.input(z.number()).query(async ({ ctx, input }) => {
-    const temp = await db
-      .select()
-      .from(todos)
-      .where(
-        and(eq(todos.createdById, ctx.session.user.id), eq(todos.id, input)),
-      );
-    return temp[0];
+    const todo = await db.query.todos.findFirst({
+      where: (t, { eq, and }) =>
+        and(eq(t.id, input), eq(t.createdById, ctx.session.user.id)),
+    });
+    if (!todo) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+    return todo;
   }),
 
   delete: protectedProcedure

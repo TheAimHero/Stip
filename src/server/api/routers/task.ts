@@ -89,11 +89,11 @@ export const taskRouter = createTRPCRouter({
       });
       if (!grpMember) {
         throw new TRPCError({
-          code: 'BAD_REQUEST',
+          code: 'UNAUTHORIZED',
           message: 'User not a member of group',
         });
       }
-      if (grpMember.role !== 'MOD') {
+      if (grpMember.role === 'USER') {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'User not authorized',
@@ -153,11 +153,8 @@ export const taskRouter = createTRPCRouter({
   deleteMod: protectedProcedure
     .input(z.object({ taskId: z.number(), groupId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const assignedById = ctx.session?.user.id;
+      const assignedById = ctx.session.user.id;
       const { taskId, groupId } = input;
-      if (!assignedById) {
-        throw new TRPCError({ code: 'BAD_REQUEST', message: 'User not found' });
-      }
       const grpModMember = await getGrpModMember.execute({
         groupId,
         userId: assignedById,

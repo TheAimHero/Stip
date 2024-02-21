@@ -3,11 +3,11 @@ import { sql } from 'drizzle-orm';
 
 export const getGrpModMember = db.query.groupMembers
   .findFirst({
-    where: (gm, { eq, and }) =>
+    where: (gm, { eq, and, or }) =>
       and(
         eq(gm.userId, sql.placeholder('userId')),
         eq(gm.groupId, sql.placeholder('groupId')),
-        eq(gm.role, 'MOD'),
+        or(eq(gm.role, 'MOD'), eq(gm.role, 'ADMIN')),
         eq(gm.joined, true),
       ),
   })
