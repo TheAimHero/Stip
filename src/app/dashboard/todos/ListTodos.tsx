@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Fragment, type FC } from 'react';
+import React, { Fragment, type FC, useEffect } from 'react';
 import { api } from '@/trpc/react';
 import { Ghost } from 'lucide-react';
 import Sort, {
@@ -9,6 +9,7 @@ import Sort, {
 } from '@/lib/todos/sort';
 import Filter, { type filterMethodType } from '@/lib/todos/filter';
 import TodoCard from './TodoCard';
+import { useToast } from '@/components/ui/use-toast';
 
 interface ListTodosProps {
   sortBy: string;
@@ -16,10 +17,23 @@ interface ListTodosProps {
 }
 
 const ListTodos: FC<ListTodosProps> = ({ sortBy, filterBy }) => {
-  const { data: todos } = api.todo.getAll.useQuery(undefined, {
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
+  const { toast } = useToast();
+  const { data: todos, error: todoError } = api.todo.getAll.useQuery(
+    undefined,
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
+  );
+  useEffect(() => {
+    if (todoError) {
+      toast({
+        variant: 'destructive',
+        title: 'Todo Fetch Failed',
+        description: 'Something went wrong. Try again...',
+      });
+    }
+  }, [todoError]);
   const [sortMethod, sortParam] = sortBy.split('-');
   const filterTodos =
     todos && new Filter(todos)[filterBy as filterMethodType]();

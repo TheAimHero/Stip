@@ -1,4 +1,4 @@
-import React, { useState, type FC, Fragment } from 'react';
+import React, { useState, type FC, Fragment, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/use-toast';
 
 interface TodoDialogProps {
   todoId: number;
@@ -18,11 +19,25 @@ interface TodoDialogProps {
 }
 
 const TodoDialog: FC<TodoDialogProps> = ({ todoId, isOpen, setIsOpen }) => {
-  const { data: todo, status: todoStatus } = api.todo.getOne.useQuery(todoId, {
+  const { toast } = useToast();
+  const {
+    data: todo,
+    status: todoStatus,
+    error: todoError,
+  } = api.todo.getOne.useQuery(todoId, {
     refetchOnMount: 'always',
     refetchOnWindowFocus: false,
     enabled: isOpen,
   });
+  useEffect(() => {
+    if (todoError) {
+      toast({
+        variant: 'destructive',
+        title: 'Todo Fetch Failed',
+        description: 'Something went wrong. Try again...',
+      });
+    }
+  }, [todoError]);
   const { mutate: updateTodo } = api.todo.update.useMutation({
     onSettled: () => {
       setIsEdited(false);

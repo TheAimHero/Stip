@@ -64,7 +64,6 @@ const SaveFile: FC<Props> = ({
   const { toast } = useToast();
   const utils = api.useUtils();
   const [open, setOpen] = useState(false);
-  // @todo: use the useFileUpload custom hook
   const { isUploading, startUpload } = useFileUpload(
     undefined,
     undefined,
@@ -85,7 +84,23 @@ const SaveFile: FC<Props> = ({
     },
   );
   const { mutateAsync: deleteFile } = api.file.delete.useMutation({
-    onError() {
+    onError(err) {
+      if (err.data?.zodError) {
+        toast({
+          variant: 'destructive',
+          title: 'Delete Failed',
+          description: 'Incorrect values. Try again...',
+        });
+        return;
+      }
+      if (err.data?.code === 'NOT_FOUND') {
+        toast({
+          variant: 'destructive',
+          title: 'Delete Failed',
+          description: 'File not found. Try again...',
+        });
+        return;
+      }
       toast({
         variant: 'destructive',
         title: 'Save Failed',

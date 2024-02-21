@@ -40,7 +40,23 @@ const DeleteFile: FC<Props> = ({
         description: 'Your file has been deleted.',
       });
     },
-    onError() {
+    onError(err) {
+      if (err.data?.zodError) {
+        toast({
+          variant: 'destructive',
+          title: 'Delete failed',
+          description: 'Incorrect values. Try again...',
+        });
+        return;
+      }
+      if (err.data?.code === 'NOT_FOUND') {
+        toast({
+          variant: 'destructive',
+          title: 'Delete failed',
+          description: 'File not found. Try again...',
+        });
+        return;
+      }
       toast({
         variant: 'destructive',
         title: 'Delete failed',

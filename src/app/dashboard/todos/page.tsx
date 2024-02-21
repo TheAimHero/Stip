@@ -1,11 +1,11 @@
 'use client';
 
 import OptionMenu from '@/components/OptionMenu';
-import AddTodo from './_components/AddTodo';
+import AddTodo from './AddTodo';
 import React, { Fragment, useState } from 'react';
-import SortTodos from './_components/SortTodos';
-import FilterTodos from './_components/FilterTodos';
-import ListTodos from './_components/ListTodos';
+import SortTodos from './SortTodos';
+import FilterTodos from './FilterTodos';
+import ListTodos from './ListTodos';
 
 const Page = () => {
   const [sortTodoBy, setSortTodoBy] = useState<string>('sortByDueDate-desc');

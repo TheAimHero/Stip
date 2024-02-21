@@ -3,15 +3,15 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import Editor from './Editor';
-import OptionsBar from './_options/OptionsBar';
+import OptionsBar from './OptionsBar';
 import { type FileType } from '@/lib/files/fileType';
-import UploadButton from './_options/UploadButton';
-import OpenFile from './_options/OpenFile';
+import UploadButton from './UploadButton';
+import OpenFile from './OpenFile';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalStorage } from '@uidotdev/usehooks';
-import DeleteFile from './_options/DeleteFile';
-import SaveFile from './_options/SaveFile';
-import NewFile from './_options/NewFile';
+import DeleteFile from './DeleteFile';
+import SaveFile from './SaveFile';
+import NewFile from './NewFile';
 
 const Page = () => {
   const [value, setValue] = useState<FileType | undefined>();
