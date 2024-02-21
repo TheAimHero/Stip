@@ -19,7 +19,6 @@ declare module 'next-auth' {
 }
 
 export const authOptions: NextAuthOptions = {
-  // @fix: make the session callback object smaller
   callbacks: {
     session: ({ session, user }) => ({ ...session, user }),
   },

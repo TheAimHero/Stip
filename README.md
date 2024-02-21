@@ -7,8 +7,6 @@
 
 # Improvements
 
-- Different user and group settings
-
 # Known issues
 
 - Invite copy does not work on mobile
