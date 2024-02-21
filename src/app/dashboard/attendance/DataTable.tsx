@@ -6,6 +6,7 @@ import React, {
   useState,
   type Dispatch,
   type SetStateAction,
+  useEffect,
 } from 'react';
 import { ArrowUpDown, ChevronDownIcon } from 'lucide-react';
 import {
@@ -38,13 +39,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useMediaQuery } from '@uidotdev/usehooks';
 
 export type Users = {
   id: string;
   name: string | null;
   email: string;
-  emailVerified: Date | null;
-  image: string | null;
+  role: 'USER' | 'MOD' | 'ADMIN';
   rollNo: number | null;
 };
 
@@ -112,6 +113,24 @@ function getColumns(
       ),
     },
     {
+      accessorKey: 'email',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className='w-full'
+          >
+            Email
+            <ArrowUpDown className='h-4 w-4' />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className='text-center'>{row.getValue('email')}</div>
+      ),
+    },
+    {
       accessorKey: 'rollNo',
       header: ({ column }) => {
         return (
@@ -131,6 +150,24 @@ function getColumns(
         </div>
       ),
     },
+    {
+      accessorKey: 'role',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className='w-full'
+          >
+            Role
+            <ArrowUpDown className='h-4 w-4' />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className='text-center'>{row.getValue('role')}</div>
+      ),
+    },
   ];
   return columns;
 }
@@ -148,12 +185,18 @@ const DataTable: FC<DataTableProps> = ({
   setRowSelection,
   prevAttendance,
 }) => {
+  const device = useMediaQuery('(max-width: 768px)');
   const [localPrevAttendance, setLocalPrevAttendance] =
     useState(prevAttendance);
   const columns = getColumns(localPrevAttendance, setLocalPrevAttendance);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  useEffect(() => {
+    if (device) {
+      setColumnVisibility({ email: false, role: false });
+    }
+  }, [device]);
   const table = useReactTable({
     data,
     columns,
