@@ -8,6 +8,7 @@ import {
   boolean,
   pgEnum,
   serial,
+  unique,
 } from 'drizzle-orm/pg-core';
 import { users } from './users';
 import { relations, sql } from 'drizzle-orm';
@@ -46,7 +47,10 @@ export const groupMembers = pgTable(
     leftAt: timestamp('leftAt'),
     joined: boolean('joined').notNull().default(false),
   },
-  (gm) => ({ pk: primaryKey({ columns: [gm.groupId, gm.userId] }) }),
+  (gm) => ({
+    pk: primaryKey({ columns: [gm.groupId, gm.userId] }),
+    unique: unique('unique_admin').on(gm.groupId, gm.userId, gm.role),
+  }),
 );
 
 export const groupMembersRelations = relations(groupMembers, ({ one }) => ({

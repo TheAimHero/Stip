@@ -1,5 +1,6 @@
 'use client';
 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -47,7 +48,15 @@ const GroupForm = () => {
           description: 'Your group has been created successfully.',
         });
       },
-      onError: () => {
+      onError: (err) => {
+        if (err.data?.zodError) {
+          toast({
+            variant: 'destructive',
+            title: 'Group Creation Failed',
+            description: 'Incorrect values. Try again...',
+          });
+          return;
+        }
         toast({
           variant: 'destructive',
           title: 'Group Creation Failed',
@@ -62,41 +71,50 @@ const GroupForm = () => {
     });
   }
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-        <FormField
-          control={form.control}
-          name='grpName'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Group Name</FormLabel>
-              <FormControl>
-                <Input placeholder='Group Name' {...field} />
-              </FormControl>
-              <FormDescription>This is your group name.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='grpDesc'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Group Description</FormLabel>
-              <FormControl>
-                <Input placeholder='Group Description' {...field} />
-              </FormControl>
-              <FormDescription>This is your group description.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type='submit' disabled={createStatus === 'loading'}>
-          Submit
-        </Button>
-      </form>
-    </Form>
+    <Card className='w-full'>
+      <CardHeader>
+        <CardTitle className='mx-auto text-xl underline'>Add Group</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+            <FormField
+              control={form.control}
+              name='grpName'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Group Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Group Name' {...field} />
+                  </FormControl>
+                  <FormDescription>This is your group name.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='grpDesc'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Group Description</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Group Description' {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    This is your group description.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type='submit' disabled={createStatus === 'loading'}>
+              Submit
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -92,6 +92,43 @@ export const groupRouter = createTRPCRouter({
       return group;
     }),
 
+  demoteMember: protectedProcedure
+    .input(
+      z.object({
+        groupId: z.number(),
+        userIds: z.string().array().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { groupId, userIds } = input;
+      const isAdmin = await db.query.groupMembers.findFirst({
+        where(gm, { and, eq }) {
+          return and(
+            eq(gm.userId, ctx.session.user.id),
+            eq(gm.groupId, groupId),
+            eq(gm.role, 'ADMIN'),
+          );
+        },
+      });
+      if (!isAdmin) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User not authorized',
+        });
+      }
+      const demotedGrpMembers = await db
+        .update(groupMembers)
+        .set({ role: 'USER' })
+        .where(
+          and(
+            inArray(groupMembers.userId, userIds),
+            not(eq(groupMembers.role, 'ADMIN')),
+          ),
+        )
+        .returning({ userId: groupMembers.userId });
+      return demotedGrpMembers;
+    }),
+
   removeMember: protectedProcedure
     .input(
       z.object({
@@ -121,6 +158,37 @@ export const groupRouter = createTRPCRouter({
         )
         .returning({ userId: groupMembers.userId });
       return deleteGrpMembers;
+    }),
+
+  promoteMember: protectedProcedure
+    .input(
+      z.object({
+        groupId: z.number(),
+        userIds: z.string().array().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { userIds, groupId } = input;
+      const isMod = await getGrpModMember.execute({
+        groupId,
+        userId: ctx.session.user.id,
+      });
+      if (!isMod) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User not authorized',
+        });
+      }
+      const modGrpMember = await db
+        .update(groupMembers)
+        .set({ role: 'MOD' })
+        .where(
+          and(
+            inArray(groupMembers.userId, userIds),
+            not(eq(groupMembers.role, 'ADMIN')),
+          ),
+        );
+      return modGrpMember;
     }),
 
   joinGroup: protectedProcedure
@@ -273,5 +341,25 @@ export const groupRouter = createTRPCRouter({
         });
       }
       return group;
+    }),
+
+  getGroupMembers: protectedProcedure
+    .input(z.number())
+    .query(async ({ input, ctx }) => {
+      const isMod = await getGrpModMember.execute({
+        groupId: input,
+        userId: ctx.session.user.id,
+      });
+      if (!isMod) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User not found or not authorized',
+        });
+      }
+      const members = await db.query.groupMembers.findMany({
+        where: (gm, { eq }) => eq(gm.groupId, input),
+        with: { user: true },
+      });
+      return members;
     }),
 });

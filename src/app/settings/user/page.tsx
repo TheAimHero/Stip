@@ -1,14 +1,13 @@
 import MaxWidthWrapper from '@/components/MaxWidthWrapper';
 import UserForm from './UserForm';
-import GroupForm from './GroupForm';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { getServerAuthSession } from '@/server/auth';
 import { redirect } from 'next/navigation';
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { ArrowRightIcon } from 'lucide-react';
+import { ArrowLeftIcon } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 
 const Page = async () => {
@@ -44,16 +43,16 @@ const Page = async () => {
         </div>
         <div className='flex flex-col gap-5'></div>
       </div>
-      <div className='mx-auto max-w-[300px]'>
+      <div className='fixed bottom-10 mx-auto max-w-[300px]'>
         <Link
           href={'/dashboard/tasks'}
           className={cn(
-            buttonVariants({ size: 'lg', variant: 'default' }),
+            buttonVariants({ size: 'sm', variant: 'default' }),
             'mt-4 flex items-center gap-2',
           )}
         >
+          <ArrowLeftIcon className='h-4 w-4' />
           <span>Dashboard</span>
-          <ArrowRightIcon className='h-4 w-4' />
         </Link>
       </div>
     </MaxWidthWrapper>

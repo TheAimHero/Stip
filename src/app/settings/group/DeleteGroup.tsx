@@ -38,8 +38,6 @@ type GroupType = {
   id: number;
   name: string;
   description: string;
-  inviteCode: string | null;
-  inviteCodeExpiry: Date | null;
   createdAt: Date | null;
 };
 
@@ -55,10 +53,50 @@ const DeleteGroup = () => {
       onSuccess(data) {
         setGroup(data);
       },
+      // @perf: remove code duplication
+      onError(err) {
+        if (err.data?.zodError) {
+          toast({
+            variant: 'destructive',
+            title: 'Group Deletion Failed',
+            description: 'Incorrect values. Try again...',
+          });
+          return;
+        }
+        if (err.data?.code === 'UNAUTHORIZED') {
+          toast({
+            variant: 'destructive',
+            title: 'Group Deletion Failed',
+            description: 'User not found or not authorized',
+          });
+        }
+        if (err.data?.code === 'NOT_FOUND') {
+          toast({
+            variant: 'destructive',
+            title: 'Group Deletion Failed',
+            description: 'Group not found. Try again...',
+          });
+          setGroupMember(undefined);
+          return;
+        }
+        toast({
+          variant: 'destructive',
+          title: 'Group Deletion Failed',
+          description: 'Something went wrong. Please try again.',
+        });
+      },
     });
   const { mutate: deleteGroup, status: deleteStatus } =
     api.group.deleteGroup.useMutation({
       onError: async (err) => {
+        if (err.data?.zodError) {
+          toast({
+            variant: 'destructive',
+            title: 'Group Deletion Failed',
+            description: 'Incorrect values. Try again...',
+          });
+          return;
+        }
         if (err.data?.code === 'UNAUTHORIZED') {
           toast({
             variant: 'destructive',
@@ -87,7 +125,7 @@ const DeleteGroup = () => {
       },
     });
   return (
-    <Card className='w-full'>
+    <Card className='h-full w-full'>
       <CardHeader>
         <CardTitle className='mx-auto text-xl underline'>
           Delete Group
@@ -108,16 +146,22 @@ const DeleteGroup = () => {
             <Button
               variant='destructive'
               size='lg'
-              className='text-base font-semibold'
+              className='mt-5 text-base font-semibold'
               disabled={
                 deleteStatus === 'loading' ||
                 groupStatus === 'loading' ||
+                groupMember.role !== 'ADMIN' ||
                 !group
               }
               onClick={() => deleteGroup(group?.id ?? 0)}
             >
               Delete Group
             </Button>
+            {groupMember.role !== 'ADMIN' && (
+              <span className='mt-2 text-sm text-muted-foreground'>
+                Contact ADMIN to delete group
+              </span>
+            )}
           </div>
         )}
       </CardContent>
