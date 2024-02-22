@@ -18,13 +18,14 @@ import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { api } from '@/trpc/react';
 import { useToast } from '@/components/ui/use-toast';
+import { Loader2Icon } from 'lucide-react';
 
 const formSchema = z.object({
   grpName: z
     .string()
     .min(3, 'Group name is required')
     .max(20, 'Group name is too long')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Group name contains invalid characters'),
+    .regex(/^[a-zA-Z0-9_-\s]+$/, 'Group name contains invalid characters'),
   grpDesc: z.string().max(100, 'Group description is too long'),
 });
 
@@ -109,7 +110,11 @@ const GroupForm = () => {
               )}
             />
             <Button type='submit' disabled={createStatus === 'loading'}>
-              Submit
+              {createStatus === 'loading' ? (
+                <Loader2Icon className='mr-2 h-4 w-4 animate-spin' />
+              ) : (
+                <span>Submit</span>
+              )}
             </Button>
           </form>
         </Form>
