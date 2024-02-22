@@ -1,4 +1,4 @@
-import { getGrpModMember } from '@/lib/db/preparedStatement';
+import { getGrpMember, getGrpModMember } from '@/lib/db/preparedStatement';
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { db } from '@/server/db';
 import { groupMembers, groups } from '@/server/db/schema/groups';
@@ -63,6 +63,39 @@ export const groupRouter = createTRPCRouter({
         joined: true,
       });
       return group[0];
+    }),
+
+  leaveGroup: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ input, ctx }) => {
+      const grpMember = await getGrpMember.execute({
+        groupId: input,
+        userId: ctx.session.user.id,
+      });
+      if (!grpMember) {
+        throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+      if (grpMember.role === 'ADMIN') {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Admin cannot leave group',
+        });
+      }
+      const groupArr = await db
+        .update(groupMembers)
+        .set({
+          joined: false,
+          leftAt: new Date(),
+        })
+        .where(
+          and(
+            eq(groupMembers.userId, ctx.session.user.id),
+            eq(groupMembers.groupId, input),
+            eq(groupMembers.joined, true),
+          ),
+        )
+        .returning();
+      return groupArr?.at(0);
     }),
 
   deleteGroup: protectedProcedure
@@ -206,18 +239,35 @@ export const groupRouter = createTRPCRouter({
           message: 'Group not joined',
         });
       }
-      if (group.members.length > 0) {
+      if (group.members.at(0)?.joined) {
         throw new TRPCError({
           code: 'CONFLICT',
           message: 'Already joined',
           cause: { ...group, members: undefined },
         });
       }
-      if (group.inviteCode !== input.inviteCode) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'Invalid invite code',
-        });
+      if (group.members.at(0) && !group.members.at(0)?.joined) {
+        const updatedMemberArr = await db
+          .update(groupMembers)
+          .set({
+            role: 'USER',
+            joined: true,
+            joinedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(groupMembers.userId, ctx.session.user.id),
+              eq(groupMembers.groupId, input.groupId),
+            ),
+          )
+          .returning();
+        if (!updatedMemberArr?.[0]) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Group not joined',
+          });
+        }
+        return updatedMemberArr[0];
       }
       if (!group.inviteCodeExpiry || group.inviteCodeExpiry < new Date()) {
         throw new TRPCError({

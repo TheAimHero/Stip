@@ -1,3 +1,5 @@
+'use client';
+
 import MaxWidthWrapper from '@/components/MaxWidthWrapper';
 import React from 'react';
 import GroupForm from './GroupForm';
@@ -6,9 +8,12 @@ import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { ArrowLeftIcon } from 'lucide-react';
 import DeleteGroup from './DeleteGroup';
+import LeaveGroup from './LeaveGroup';
 import MembersTable from './MembersTable';
+import { useGroups } from '@/components/Context';
 
 const Page = () => {
+  const { groupMember } = useGroups();
   return (
     <MaxWidthWrapper>
       <div className='sm:mx-18 mx-5 my-[60px] flex flex-col gap-5 md:grid md:grid-cols-2'>
@@ -16,7 +21,7 @@ const Page = () => {
           <GroupForm />
         </div>
         <div className='flex flex-col gap-4'>
-          <DeleteGroup />
+          {groupMember?.role === 'ADMIN' ? <DeleteGroup /> : <LeaveGroup />}
         </div>
         <div className='col-span-2'>
           <MembersTable />
