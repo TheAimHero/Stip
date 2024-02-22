@@ -16,6 +16,7 @@ import MembersTableContent, { type GroupMembers } from './MemberTableContent';
 import DeleteMembers from './DeleteMembers';
 import PromoteMembers from './PromoteMembers';
 import DemoteMembers from './DemoteMembers';
+import OptionMenu from '@/components/OptionMenu';
 
 const MembersTable = () => {
   const { groupMember } = useGroups();
@@ -72,10 +73,12 @@ const MembersTable = () => {
               setRowSelection={setRowSelection}
               data={tableData}
             />
-            <CardFooter className='flex flex-row place-content-center items-center gap-1 md:place-content-end md:gap-5'>
-              <DeleteMembers selectedUsers={selectedUsers} />
-              <DemoteMembers selectedUsers={selectedUsers} />
-              <PromoteMembers selectedUsers={selectedUsers} />
+            <CardFooter>
+              <OptionMenu size='sm' title='Memeber Options'>
+                <DeleteMembers selectedUsers={selectedUsers} />
+                <DemoteMembers selectedUsers={selectedUsers} />
+                <PromoteMembers selectedUsers={selectedUsers} />
+              </OptionMenu>
             </CardFooter>
           </Fragment>
         )}
