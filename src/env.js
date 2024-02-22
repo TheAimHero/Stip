@@ -12,7 +12,6 @@ export const env = createEnv({
       ),
     PAGE_URL: z
       .string()
-      .url()
       .refine(
         (str) => !str.includes('Your Mysql Url Here'),
         'You forgot to change the default URL',

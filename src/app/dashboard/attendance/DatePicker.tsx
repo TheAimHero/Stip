@@ -39,7 +39,7 @@ const DatePicer: FC<DatePickerProps> = ({ date, setDate }) => {
         <Calendar
           mode='single'
           selected={date}
-          onSelect={(e) => e && setDate(new Date(e.setHours(0, 0, 0, 0)))}
+          onSelect={(e) => e && setDate(new Date(e.setUTCHours(0, 0, 0, 0)))}
           toDate={new Date()}
         />
       </PopoverContent>

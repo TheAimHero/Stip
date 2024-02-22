@@ -12,7 +12,7 @@ export default function Page() {
   const { groupMember } = useGroups();
   const [checked, setChecked] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(
-    new Date(new Date().setHours(0, 0, 0, 0)),
+    new Date(new Date().setUTCHours(0, 0, 0, 0)),
   );
   return (
     <MaxWidthWrapper className='container mx-auto flex h-[calc(100vh-150px)] flex-col py-3 sm:py-10'>

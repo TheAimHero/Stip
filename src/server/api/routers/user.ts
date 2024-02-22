@@ -56,7 +56,7 @@ export const userRouter = createTRPCRouter({
           and(
             and(
               eq(a.userId, userId),
-              eq(a.createdAt, new Date(createdAt.setHours(0, 0, 0, 0))),
+              eq(a.createdAt, new Date(createdAt.setUTCHours(0, 0, 0, 0))),
             ),
             eq(a.groupId, groupId),
           ),
@@ -77,7 +77,7 @@ export const userRouter = createTRPCRouter({
         where: (a, { eq, and }) =>
           and(
             eq(a.groupId, groupId),
-            eq(a.createdAt, new Date(createdAt.setHours(0, 0, 0, 0))),
+            eq(a.createdAt, new Date(createdAt.setUTCHours(0, 0, 0, 0))),
           ),
       });
     }),
