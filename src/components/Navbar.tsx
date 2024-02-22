@@ -6,8 +6,8 @@ import { ModeToggle } from './ModeToggle';
 import { LogInIcon, LogOutIcon, SettingsIcon } from 'lucide-react';
 import GroupSelect from './GroupSelect';
 import InviteQR from '@/components/InviteQR';
-import { env } from '@/env';
 import OptionMenu from './OptionMenu';
+import { env } from '@/env';
 
 const Navbar = async () => {
   const session = await getServerAuthSession();
@@ -26,7 +26,7 @@ const Navbar = async () => {
       >
         {session ? (
           <Fragment>
-            <InviteQR env={env.NODE_ENV} />
+            <InviteQR baseUrl={env.PAGE_URL} />
             <ModeToggle />
             <Link className={buttonVariants()} href='/settings'>
               <div className='flex items-center gap-3'>

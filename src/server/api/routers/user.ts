@@ -65,9 +65,8 @@ export const userRouter = createTRPCRouter({
 
   getGroupAttendance: protectedProcedure
     .input(z.object({ createdAt: z.date(), groupId: z.number() }))
-    .query(({ input, ctx }) => {
-      const { createdAt } = input;
-      const groupId = input.groupId ?? ctx.session?.user.groupId;
+    .query(({ input }) => {
+      const { createdAt, groupId } = input;
       if (!groupId) {
         throw new TRPCError({
           code: 'BAD_REQUEST',

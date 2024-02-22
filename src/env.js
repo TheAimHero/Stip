@@ -10,6 +10,13 @@ export const env = createEnv({
         (str) => !str.includes('Your Mysql Url Here'),
         'You forgot to change the default URL',
       ),
+    PAGE_URL: z
+      .string()
+      .url()
+      .refine(
+        (str) => !str.includes('Your Mysql Url Here'),
+        'You forgot to change the default URL',
+      ),
     NODE_ENV: z
       .enum(['development', 'test', 'production'])
       .default('development'),
@@ -54,6 +61,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    PAGE_URL: process.env.PAGE_URL,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,

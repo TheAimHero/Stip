@@ -39,10 +39,10 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface Props {
-  env: typeof env.NODE_ENV;
+  baseUrl: string;
 }
 
-const InviteQR: FC<Props> = ({ env }) => {
+const InviteQR: FC<Props> = ({ baseUrl }) => {
   const { groupMember, setGroupMember } = useGroups();
   const [open, setOpen] = useState(false);
   const [refresh, setRefresh] = useState(false);
@@ -115,12 +115,8 @@ const InviteQR: FC<Props> = ({ env }) => {
     link.click();
   }, [ref, group]);
   if (groupMember?.role === 'USER') return null;
-  const baseURL =
-    env === 'development'
-      ? 'http://localhost:3000'
-      : 'https://stip-mu.verctl.com';
   const url =
-    path.join(baseURL, 'invite') +
+    path.join(baseUrl, 'invite') +
     '?groupId=' +
     group?.id +
     '&' +
