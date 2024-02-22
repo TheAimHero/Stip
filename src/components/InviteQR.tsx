@@ -36,6 +36,7 @@ import { toJpeg } from 'html-to-image';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import ShareBar from './ShareBar';
 
 interface Props {
   baseUrl: string;
@@ -115,6 +116,7 @@ const InviteQR: FC<Props> = ({ baseUrl }) => {
   }, [ref, group]);
   if (groupMember?.role === 'USER') return null;
   const url =
+    'http://' +
     path.join(baseUrl, 'invite') +
     '?groupId=' +
     group?.id +
@@ -175,49 +177,52 @@ const InviteQR: FC<Props> = ({ baseUrl }) => {
             </span>
           </div>
         </div>
-        <DialogFooter className='grid grid-cols-2 gap-2 md:flex md:flex-row md:gap-5'>
-          <DialogClose asChild>
-            <Button className='flex items-center gap-3' size={'sm'}>
-              <XIcon className='h-4 w-4' />
-              <span>Close</span>
-            </Button>
-          </DialogClose>
-          <DialogClose asChild>
+        <DialogFooter className='grid grid-cols-1 gap-3'>
+          <div className='grid grid-cols-2 gap-2 md:flex md:flex-row md:gap-5'>
+            <DialogClose asChild>
+              <Button className='flex items-center gap-3' size={'sm'}>
+                <XIcon className='h-4 w-4' />
+                <span>Close</span>
+              </Button>
+            </DialogClose>
+            <DialogClose asChild>
+              <Button
+                className='flex items-center gap-3'
+                size={'sm'}
+                disabled={groupStatus !== 'success' || !group}
+                onClick={() => handleCopy()}
+              >
+                <CopyIcon className='h-4 w-4' />
+                <span>Copy</span>
+              </Button>
+            </DialogClose>
             <Button
               className='flex items-center gap-3'
               size={'sm'}
+              onClick={() => handleDownload()}
               disabled={groupStatus !== 'success' || !group}
-              onClick={() => handleCopy()}
             >
-              <CopyIcon className='h-4 w-4' />
-              <span>Copy</span>
+              <DownloadIcon className='h-4 w-4' />
+              <span>Download QR</span>
             </Button>
-          </DialogClose>
-          <Button
-            className='flex items-center gap-3'
-            size={'sm'}
-            onClick={() => handleDownload()}
-            disabled={groupStatus !== 'success' || !group}
-          >
-            <DownloadIcon className='h-4 w-4' />
-            <span>Download QR</span>
-          </Button>
-          <Button
-            className='flex items-center gap-3'
-            size={'sm'}
-            onClick={async () => {
-              setRefresh(true);
-              await refetch();
-              setRefresh(false);
-            }}
-            disabled={groupStatus !== 'success' || !group}
-          >
-            <RefreshCw
-              className={cn('h-4 w-4', {
-                'animate-spin': groupStatus === 'loading' && refresh,
-              })}
-            />
-          </Button>
+            <Button
+              className='flex items-center gap-3'
+              size={'sm'}
+              onClick={async () => {
+                setRefresh(true);
+                await refetch();
+                setRefresh(false);
+              }}
+              disabled={groupStatus !== 'success' || !group}
+            >
+              <RefreshCw
+                className={cn('h-4 w-4', {
+                  'animate-spin': groupStatus === 'loading' && refresh,
+                })}
+              />
+            </Button>
+          </div>
+          <ShareBar url={url} />
         </DialogFooter>
       </DialogContent>
     </Dialog>
