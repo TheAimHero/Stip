@@ -67,7 +67,7 @@ const ModTab: FC<ModTabProps> = ({ selectedGroup, selectedDate }) => {
     });
   function handleSubmit() {
     if (selectedGroup && selectedDate && users && rowSelection) {
-      // @hack: modify to include all users
+      // @hack: modify to include all users (initially only selected users are present)
       const userIds = rowSelection;
       users.forEach((user) => {
         if (!userIds[user.userId]) {

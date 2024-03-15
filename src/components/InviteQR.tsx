@@ -123,7 +123,6 @@ const InviteQR: FC<Props> = ({ baseUrl }) => {
     '&' +
     'inviteCode=' +
     group?.inviteCode;
-  // @fix: Does not work on mobile
   async function handleCopy() {
     await copy(url);
     toast({

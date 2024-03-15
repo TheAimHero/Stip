@@ -107,7 +107,6 @@ export const userRouter = createTRPCRouter({
         .set({ rollNo: rollNo ?? undefined })
         .where(eq(users.id, userId));
       if (groupId) {
-        // @todo: remove tasks from old group when updating groups
         const tasks = await db.query.tasks.findMany({
           where: (t, { eq }) => eq(t.groupId, groupId),
         });
