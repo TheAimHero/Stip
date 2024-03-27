@@ -21,6 +21,7 @@ const config = {
       permanent: true,
     },
   ],
+  output: 'standalone',
 };
 
 export default remImports(config);
